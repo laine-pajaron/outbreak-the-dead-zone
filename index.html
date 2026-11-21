@@ -1,404 +1,237 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>OUTBREAK: THE DEAD ZONE</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+    <!-- 1. PLAYER REGISTRATION -->
     <section id="signupScreen" class="screen">
-
-        <div class="game-logo">
-            <h1>OUTBREAK</h1>
-            <p class="subtitle">THE DEAD ZONE</p>
-            <p class="warning">⚠ BIOHAZARD ALERT ⚠</p>
-        </div>
 
         <div class="screen-content">
 
-            <h2>SURVIVOR REGISTRATION</h2>
+            <header>
+                <h1 class="game-logo">OUTBREAK</h1>
+                <p class="subtitle">THE DEAD ZONE</p>
+                <p class="warning">⚠ BIOHAZARD ALERT ⚠</p>
+            </header>
 
-            <p>
-                Identify yourself before entering the infected zone.
+            <h2>PLAYER REGISTRATION</h2>
+            <p class="screen-description">
+                ENTER YOUR IDENTIFICATION TO BEGIN
             </p>
 
             <input
                 type="text"
                 id="usernameInput"
                 placeholder="Enter your username"
-                maxlength="20"
+                maxlength="15"
                 autocomplete="off"
             >
 
-            <button type="button" onclick="registerPlayer()">
-                CONTINUE
-            </button>
+            <button onclick="registerPlayer()">CONTINUE</button>
 
             <p id="signupMessage"></p>
 
         </div>
 
-        <footer>
-            SURVIVE THE OUTBREAK. ESCAPE THE DEAD ZONE.
-        </footer>
-
     </section>
 
+
+    <!-- 2. CHARACTER SELECTION -->
     <section id="characterSelection" class="screen" hidden>
-
-        <div class="section-heading">
-
-            <p class="eyebrow">SURVIVOR DATABASE</p>
-
-            <h2>CHOOSE YOUR CHARACTER</h2>
-
-            <p>Select your survivor to begin the mission.</p>
-
-        </div>
-
-        <div class="character-options">
-
-            <div
-                class="character-card"
-                onclick="selectCharacter('female')"
-            >
-
-                <img
-                    src="images/player1.png"
-                    alt="Female survivor"
-                >
-
-                <h3>FEMALE SURVIVOR</h3>
-
-                <p>Ready to face the outbreak.</p>
-
-                <button type="button">SELECT</button>
-
-            </div>
-
-
-            <div
-                class="character-card"
-                onclick="selectCharacter('male')"
-            >
-
-                <img
-                    src="images/player2.png"
-                    alt="Male survivor"
-                >
-
-                <h3>MALE SURVIVOR</h3>
-
-                <p>Ready to face the outbreak.</p>
-
-                <button type="button">SELECT</button>
-
-            </div>
-
-        </div>
-
-        <footer>
-            CHOOSE WISELY. YOUR SURVIVAL STARTS HERE.
-        </footer>
-
-    </section>
-
-    <section id="mainMenu" class="screen" hidden>
-
-        <div class="game-logo">
-
-            <h1>OUTBREAK</h1>
-
-            <p class="subtitle">THE DEAD ZONE</p>
-
-            <p class="warning">⚠ BIOHAZARD ALERT ⚠</p>
-
-        </div>
 
         <div class="screen-content">
 
-            <h2>WELCOME, SURVIVOR</h2>
+            <header>
+                <h1>SELECT YOUR SURVIVOR</h1>
+                <p class="subtitle">CHOOSE YOUR CHARACTER</p>
+            </header>
 
-            <p class="menu-description">
-                The infected have taken over. Your mission begins now.
-            </p>
+            <div class="character-options character-container">
 
-            <div class="profile-info">
+                <button class="character-option character-card"
+                        data-character="player1">
 
-                <p>
-                    USERNAME:
-                    <strong id="displayUsername"></strong>
-                </p>
+                    <img src="images/player1.png" alt="Female Character">
 
-                <p id="selectedCharacterText"></p>
+                    <p>CHARACTER 1</p>
+
+                </button>
+
+                <button class="character-option character-card"
+                        data-character="player2">
+
+                    <img src="images/player2.png" alt="Male Character">
+
+                    <p>CHARACTER 2</p>
+
+                </button>
 
             </div>
 
-            <button
-                class="start-button"
-                type="button"
-                onclick="beginGame()"
-            >
-                START GAME
-            </button>
+            <p id="selectedCharacterText"></p>
 
         </div>
-
-        <footer>
-            ENTER THE DEAD ZONE AT YOUR OWN RISK.
-        </footer>
 
     </section>
 
-    <main id="gameScreen" class="game-screen" hidden>
 
-        <aside class="game-hud">
+    <!-- 3. MAIN MENU -->
+    <section id="mainMenu" class="screen" hidden>
 
-            <div class="hud-title">
-                OUTBREAK
-                <span>THE DEAD ZONE</span>
-            </div>
+        <div class="screen-content">
 
-            <div class="hud-stat">
+            <header>
+                <h1 class="game-logo">OUTBREAK</h1>
+                <p class="subtitle">THE DEAD ZONE</p>
+                <p class="warning">⚠ BIOHAZARD ALERT ⚠</p>
+            </header>
 
-                <span>❤️ HEALTH</span>
+            <p class="welcome-text">
+                SURVIVOR IDENTIFIED:
+                <span id="displayUsername"></span>
+            </p>
 
-                <strong id="health">100</strong>
+            <button id="startGameButton">START GAME</button>
 
-            </div>
+            <p class="screen-description">
+                SURVIVE THE OUTBREAK. ESCAPE THE DEAD ZONE.
+            </p>
 
-            <div class="hud-stat">
+        </div>
 
-                <span>🔫 AMMO</span>
+    </section>
 
-                <strong id="ammo">12 / 48</strong>
 
-            </div>
+    <!-- 4. MAIN GAME SCREEN -->
+    <section id="gameScreen" class="game-screen" hidden>
 
-            <div class="hud-stat">
-
-                <span>🩹 MEDKITS</span>
-
-                <strong id="medkits">3</strong>
-
-            </div>
-
-            <div class="hud-inventory">
-
-                <span>🎒 INVENTORY</span>
-
-                <p id="items">SURVIVING</p>
-
-            </div>
-
-        </aside>
-
+        <!-- THREE.JS ENVIRONMENT -->
         <div id="game3D"></div>
 
 
-        <div
-            id="controlsOverlay"
-            class="controls-overlay"
-            hidden
-        >
+        <!-- PLAYER STATUS: TOP LEFT -->
+        <div id="gameHUD" class="game-hud">
 
-            <div class="controls-panel">
+            <h3 class="hud-title">PLAYER STATUS</h3>
 
-                <p class="eyebrow">SURVIVAL GUIDE</p>
+            <div class="hud-stat">
+                <span>❤️ HEALTH</span>
+                <span id="health">100</span>
+            </div>
 
-                <h2>HOW TO SURVIVE</h2>
+            <div class="hud-stat">
+                <span>🔫 AMMO</span>
+                <span id="ammo">12</span>
+            </div>
 
-                <p class="controls-subtitle">
-                    Learn the controls before entering the infected zone.
-                </p>
+            <div class="hud-stat">
+                <span>🎒 MEDKITS</span>
+                <span id="medkits">2</span>
+            </div>
 
-
-                <div class="instructions-grid">
-
-
-                    <div class="instruction-group">
-
-                        <h3>LAPTOP / PC</h3>
-
-                        <p><span>A / D</span> Move</p>
-
-                        <p><span>SPACE</span> Jump</p>
-
-                        <p><span>SHIFT</span> Run</p>
-
-                        <p><span>J</span> Shoot</p>
-
-                        <p><span>R</span> Reload</p>
-
-                        <p><span>E</span> Hide / Interact</p>
-
-                        <p><span>S</span> Crouch</p>
-
-                        <p><span>H</span> Use Medkit</p>
-
-                    </div>
-
-
-                    <!-- MOBILE CONTROLS -->
-
-                    <div class="instruction-group">
-
-                        <h3>MOBILE</h3>
-
-                        <p><span>◀ / ▶</span> Move</p>
-
-                        <p><span>▲</span> Jump</p>
-
-                        <p><span>RUN</span> Run</p>
-
-                        <p><span>SHOOT</span> Attack</p>
-
-                        <p><span>RELOAD</span> Reload</p>
-
-                        <p><span>HIDE</span> Hide / Interact</p>
-
-                        <p><span>CROUCH</span> Crouch</p>
-
-                        <p><span>MEDKIT</span> Heal</p>
-
-                    </div>
-
-                </div>
-
-
-                <p class="warning-text">
-                    ⚠ YOUR SURVIVAL IS NOT GUARANTEED.
-                </p>
-
-
-                <button
-                    type="button"
-                    onclick="continueGame()"
-                >
-                    CONTINUE
-                </button>
-
+            <div class="hud-stat">
+                <span>INVENTORY</span>
+                <span id="items">0</span>
             </div>
 
         </div>
 
 
-        <section class="game-story">
+        <!-- STORY PANEL: CENTER BOTTOM -->
+        <div id="storyPanel" class="game-story">
 
-            <p id="location">
-                LOCATION: UNKNOWN
-            </p>
+            <div class="story-header">
 
-            <h2 id="scene-title">
-                THE OUTBREAK
-            </h2>
+                <p id="location">LOCATION: UNKNOWN</p>
+
+                <h2 id="scene-title">THE OUTBREAK</h2>
+
+            </div>
 
             <p id="story-text"></p>
 
-            <p id="mission-text">
-                MISSION: Explore the forest.
-            </p>
+            <p id="mission-text"></p>
 
-            <div id="choices"></div>
+        </div>
 
-        </section>
 
-        <div class="mobile-controls">
+        <!-- CONTROLS TUTORIAL -->
+        <div id="controlsOverlay" class="controls-overlay">
 
-            <div class="movement-pad">
+            <div class="controls-content">
 
-                <button
-                    type="button"
-                    data-move="left"
-                    aria-label="Move left"
-                >
-                    ◀
-                </button>
+                <p class="warning">⚠ SURVIVOR TRAINING ⚠</p>
 
-                <button
-                    type="button"
-                    data-move="right"
-                    aria-label="Move right"
-                >
-                    ▶
-                </button>
+                <h2>HOW TO PLAY</h2>
 
-                <button
-                    type="button"
-                    data-move="jump"
-                    aria-label="Jump"
-                >
-                    ▲
-                </button>
+                <div class="control-list">
 
-            </div>
+                    <p><span>WASD / ARROW KEYS</span> MOVE</p>
+                    <p><span>SPACE</span> JUMP</p>
+                    <p><span>SHIFT</span> RUN</p>
+                    <p><span>J</span> SHOOT</p>
+                    <p><span>R</span> RELOAD</p>
+                    <p><span>H</span> USE MEDKIT</p>
+                    <p><span>E</span> HIDE</p>
+                    <p><span>S</span> CROUCH</p>
 
-            <div class="action-buttons">
+                </div>
 
-                <button
-                    type="button"
-                    data-move="shoot"
-                >
-                    SHOOT
-                </button>
-
-                <button
-                    type="button"
-                    data-move="run"
-                >
-                    RUN
-                </button>
-
-                <button
-                    type="button"
-                    data-move="interact"
-                >
-                    HIDE
-                </button>
-
-                <button
-                    type="button"
-                    data-move="crouch"
-                >
-                    CROUCH
-                </button>
-
-                <button
-                    type="button"
-                    data-move="reload"
-                >
-                    RELOAD
-                </button>
-
-                <button
-                    type="button"
-                    data-move="medkit"
-                >
-                    MEDKIT
-                </button>
+                <button id="continueButton">CONTINUE</button>
 
             </div>
 
         </div>
 
-        <button
-            class="exit-game"
-            type="button"
-            onclick="restartGame()"
-        >
-            RESTART
-        </button>
+
+        <!-- GAME ACTION BUTTONS -->
+        <div id="mobileControls" class="mobile-controls">
+
+            <div class="movement-pad">
+
+                <button data-move="left">◀</button>
+                <button data-move="right">▶</button>
+                <button data-move="jump">JUMP</button>
+
+            </div>
+
+            <div class="interact-button">
+
+                <button data-move="shoot">SHOOT</button>
+                <button data-move="reload">RELOAD</button>
+                <button data-move="hide">HIDE</button>
+
+            </div>
+
+        </div>
+
+        <!-- GAME END SCREEN -->
+        <div id="gameEndScreen" class="game-end-screen" hidden>
+    <div class="game-end-content">
+        <h1 id="gameEndTitle">GAME OVER</h1>
+
+        <p id="gameEndMessage">
+            You have been overrun by the infected.
+        </p>
+
+        <div class="game-end-buttons">
+            <button id="restartButton">RESTART GAME</button>
+            <button id="quitButton">QUIT GAME</button>
+        </div>
+    </div>
+    </section>
 
 
-        <footer>
-            STAY ALERT. STAY ALIVE.
-        </footer>
-
-    </main>
-
+    <!-- GAME SCRIPT -->
     <script type="module" src="script.js"></script>
 
 </body>
