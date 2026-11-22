@@ -196,7 +196,7 @@ function makeBox(x, y, z, w, h, d, material) {
 // =====================================
 
 // Ground
-makeBox(55, -4.4, 0, 130, 1, 4, mat.ground);
+makeBox(55, -5.9, 0, 130, 4, 4, mat.ground);
 
 // Floor markings
 for (let x = -10; x < 120; x += 8) {
@@ -1907,6 +1907,9 @@ function resizeGame() {
 
     camera.top = viewHeight / 2;
     camera.bottom = -viewHeight / 2;
+
+    camera.position.y = CAMERA_Y;
+    camera.lookAt(camera.position.x, CAMERA_Y, 0);
 
     camera.updateProjectionMatrix();
 
