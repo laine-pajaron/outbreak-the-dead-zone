@@ -198,6 +198,10 @@
         </div>
 
 
+        <!-- PAUSE BUTTON: TOP RIGHT -->
+        <button id="pauseButton" class="pause-button" aria-label="Pause game">❚❚</button>
+
+
         <!-- PORTRAIT HINT (shows only on portrait phones) -->
         <div class="rotate-hint">↻ ROTATE YOUR PHONE TO LANDSCAPE FOR THE BEST VIEW</div>
 
@@ -295,6 +299,29 @@
                 <button class="act-shoot"  data-move="shoot"><span>🔫</span><small>SHOOT</small></button>
             </div>
 
+        </div>
+
+
+        <!-- PAUSE MENU -->
+        <div id="pauseScreen" class="game-end-screen" hidden>
+            <div class="game-end-content">
+
+                <h1>PAUSED</h1>
+
+                <p>Take a breather, survivor. The infected will wait.</p>
+
+                <div class="game-end-scores">
+                    <p>SCORE: <span id="pauseScore">0</span></p>
+                    <p id="pauseMission"></p>
+                </div>
+
+                <div class="game-end-buttons">
+                    <button id="resumeButton">RESUME</button>
+                    <button id="pauseRestartButton">RESTART GAME</button>
+                    <button id="pauseQuitButton">QUIT GAME</button>
+                </div>
+
+            </div>
         </div>
 
 

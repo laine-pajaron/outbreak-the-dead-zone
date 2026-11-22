@@ -882,13 +882,62 @@ button:focus-visible {
     transform: scale(1.03);
 }
 
-#quitButton {
+#quitButton,
+#pauseQuitButton {
     background: #303832;
     border-color: #58645a;
 }
 
-#quitButton:hover {
+#quitButton:hover,
+#pauseQuitButton:hover {
     background: #465448;
+}
+
+/* Pause menu */
+#pauseScreen h1 {
+    color: #a9c69c;
+}
+
+#pauseScreen #pauseMission {
+    font-size: 12px;
+    font-weight: normal;
+    letter-spacing: 1px;
+    line-height: 1.5;
+    color: #ccc;
+}
+
+#resumeButton {
+    background: #2f5a35;
+    border-color: #6fa874;
+}
+
+#resumeButton:hover {
+    background: #3f7a47;
+}
+
+/* Pause button (top right, during gameplay) */
+.pause-button {
+    position: absolute;
+    top: max(10px, env(safe-area-inset-top));
+    right: max(10px, env(safe-area-inset-right));
+
+    width: 42px;
+    height: 42px;
+    padding: 0;
+
+    border-radius: 50%;
+
+    background: rgba(8, 13, 10, 0.88);
+    border: 2px solid #819c73;
+
+    color: #eee;
+    font-size: 13px;
+    letter-spacing: 0;
+
+    z-index: 25;
+    touch-action: manipulation;
+
+    -webkit-tap-highlight-color: transparent;
 }
 
 
@@ -963,7 +1012,7 @@ button:focus-visible {
     /* Story sits to the right of the HUD */
     .game-story {
         left: calc(clamp(120px, 17vw, 190px) + 20px);
-        right: 8px;
+        right: 62px;
         transform: none;
         width: auto;
         max-height: 26dvh;

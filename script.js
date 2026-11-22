@@ -391,6 +391,9 @@ let gameOver = false;
 let gameStarted = false;
 let gameWon = false;
 
+let isPaused = false;
+let pausedAt = 0;
+
 const gravity = 0.012;
 const jumpPower = 0.27;
 const walkSpeed = 0.11;
@@ -433,7 +436,7 @@ function finalizeScore() {
 }
 
 // If your player PNG faces LEFT, change this to false
-const SPRITE_FACES_RIGHT = false;
+const SPRITE_FACES_RIGHT = true;
 
 // Random ammo box: 10 to 30 bullets
 function randomAmmo(min = 10, max = 30) {
@@ -1650,6 +1653,77 @@ function toggleHide() {
 }
 
 // =====================================
+// 21B. PAUSE MENU
+// =====================================
+
+function pauseGame() {
+    if (!gameStarted || gameOver || isPaused) return;
+
+    isPaused = true;
+    gameStarted = false;
+    pausedAt = Date.now();
+
+    // Release any held buttons or keys
+    Object.keys(keys).forEach(key => {
+        keys[key] = false;
+    });
+
+    isRunning = false;
+    isCrouching = isHidden;
+
+    const pauseScore = document.getElementById("pauseScore");
+    const pauseMission = document.getElementById("pauseMission");
+
+    if (pauseScore) pauseScore.textContent = score;
+
+    if (pauseMission) {
+        pauseMission.textContent =
+            "MISSION " + currentMission + "/" + TOTAL_MISSIONS + ": " +
+            getMissionText();
+    }
+
+    document.getElementById("pauseScreen").hidden = false;
+}
+
+function resumeGame() {
+    if (!isPaused) return;
+
+    const pausedFor = Date.now() - pausedAt;
+
+    isPaused = false;
+    gameStarted = true;
+
+    // Don't let timers run while the game was paused
+    if (nextMonsterTime !== Infinity) {
+        nextMonsterTime += pausedFor;
+    }
+
+    lastDamageTime += pausedFor;
+
+    document.getElementById("pauseScreen").hidden = true;
+}
+
+function quitToMenu() {
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(error => {
+            console.log("Could not exit fullscreen:", error);
+        });
+    }
+
+    isPaused = false;
+
+    document.getElementById("pauseScreen").hidden = true;
+    document.getElementById("gameEndScreen").hidden = true;
+    document.getElementById("gameScreen").hidden = true;
+    document.getElementById("mainMenu").hidden = false;
+
+    gameOver = false;
+    gameStarted = false;
+
+    updateHUD();
+}
+
+// =====================================
 // 22. SURVIVAL SUPPLIES AND COLLECTIBLES
 // =====================================
 
@@ -1901,6 +1975,17 @@ function updateCollectibles() {
 document.addEventListener("keydown", (event) => {
     const key = event.key.toLowerCase();
 
+    // Pause / resume with P or Escape
+    if ((key === "p" || key === "escape") && !event.repeat) {
+        if (isPaused) {
+            resumeGame();
+        } else {
+            pauseGame();
+        }
+
+        return;
+    }
+
     if (
         [" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(key)
     ) {
@@ -2015,6 +2100,9 @@ window.beginGame = function () {
     const controlsOverlay = document.getElementById("controlsOverlay");
 
     gameScreen.hidden = false;
+
+    isPaused = false;
+    document.getElementById("pauseScreen").hidden = true;
 
     loadPlayerCharacter();
 
@@ -2391,23 +2479,38 @@ if (restartButton) {
 const quitButton = document.getElementById("quitButton");
 
 if (quitButton) {
-    quitButton.addEventListener("click", () => {
-        if (document.fullscreenElement) {
-            document.exitFullscreen().catch(error => {
-                console.log("Could not exit fullscreen:", error);
-            });
-        }
+    quitButton.addEventListener("click", quitToMenu);
+}
 
-        document.getElementById("gameEndScreen").hidden = true;
-        document.getElementById("gameScreen").hidden = true;
-        document.getElementById("mainMenu").hidden = false;
+// Pause menu buttons
+const pauseButton = document.getElementById("pauseButton");
+const resumeButton = document.getElementById("resumeButton");
+const pauseRestartButton = document.getElementById("pauseRestartButton");
+const pauseQuitButton = document.getElementById("pauseQuitButton");
 
-        gameOver = false;
-        gameStarted = false;
+if (pauseButton) {
+    pauseButton.addEventListener("click", pauseGame);
+}
 
-        updateHUD();
+if (resumeButton) {
+    resumeButton.addEventListener("click", resumeGame);
+}
+
+if (pauseRestartButton) {
+    pauseRestartButton.addEventListener("click", () => {
+        document.getElementById("pauseScreen").hidden = true;
+        window.beginGame();
     });
 }
+
+if (pauseQuitButton) {
+    pauseQuitButton.addEventListener("click", quitToMenu);
+}
+
+// Auto-pause when the player switches tabs or apps
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) pauseGame();
+});
 
 // =====================================
 // 32. INITIALIZE GAME
