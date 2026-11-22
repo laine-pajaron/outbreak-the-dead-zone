@@ -2,9 +2,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.m
 
 console.log("OUTBREAK: THE DEAD ZONE");
 
-// =====================================
 // 1. PLAYER INFORMATION + MENUS
-// =====================================
 
 let playerUsername = "";
 let selectedCharacter = "";
@@ -38,9 +36,7 @@ window.selectCharacter = function (character) {
         "Selected Character: " + character.toUpperCase();
 };
 
-// =====================================
 // 2. GAME SETUP
-// =====================================
 
 const gameContainer = document.getElementById("game3D");
 
@@ -70,9 +66,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 gameContainer.appendChild(renderer.domElement);
 
-// =====================================
 // 3. LIGHTING AND ATMOSPHERE
-// =====================================
 
 scene.add(new THREE.AmbientLight(0x87958a, 0.75));
 
@@ -93,9 +87,7 @@ const greenLight = new THREE.PointLight(0x294b35, 1.5, 20);
 greenLight.position.set(30, 1, 5);
 scene.add(greenLight);
 
-// =====================================
 // 4. MATERIALS
-// =====================================
 
 const mat = {
     ground: new THREE.MeshStandardMaterial({
@@ -131,9 +123,7 @@ const mat = {
 
 const textureLoader = new THREE.TextureLoader();
 
-// =====================================
 // 5. BACKGROUND IMAGE
-// =====================================
 
 let backgroundPlane;
 
@@ -175,9 +165,7 @@ textureLoader.load(
     }
 );
 
-// =====================================
 // 6. WORLD OBJECT HELPERS
-// =====================================
 
 function makeBox(x, y, z, w, h, d, material) {
     const mesh = new THREE.Mesh(
@@ -194,19 +182,14 @@ function makeBox(x, y, z, w, h, d, material) {
     return mesh;
 }
 
-// =====================================
 // 7. ENVIRONMENT
-// =====================================
 
-// Ground
 makeBox(55, -5.9, 0, 130, 4, 4, mat.ground);
 
-// Floor markings
 for (let x = -10; x < 120; x += 8) {
     makeBox(x, -3.87, 0.1, 0.12, 0.04, 0.1, mat.metal);
 }
 
-// Platforms
 const platforms = [];
 
 function addPlatform(x, y, width) {
@@ -225,12 +208,10 @@ addPlatform(30, -2, 4);
 addPlatform(41, -1, 3.5);
 addPlatform(54, -2, 4);
 
-// Background pillars
 for (let x = -5; x < 110; x += 15) {
     makeBox(x, 1, -2, 0.7, 10, 0.6, mat.wall);
 }
 
-// Warning lights
 for (let x = 5; x < 110; x += 20) {
     const lamp = new THREE.PointLight(0x9d2929, 1.2, 7);
 
@@ -240,7 +221,6 @@ for (let x = 5; x < 110; x += 20) {
     makeBox(x, 3.7, 0, 1.2, 0.12, 0.2, mat.red);
 }
 
-// Radio transmitter tower + defense zone marker (Mission 3)
 const RADIO_ZONE_LEFT = 36;
 const RADIO_ZONE_RIGHT = 56;
 
@@ -267,9 +247,7 @@ const zoneStrip = new THREE.Mesh(
 zoneStrip.position.set((RADIO_ZONE_LEFT + RADIO_ZONE_RIGHT) / 2, -3.88, 1.2);
 scene.add(zoneStrip);
 
-// =====================================
 // 8. HIDING CRATES
-// =====================================
 
 const hidingSpots = [];
 
@@ -289,9 +267,7 @@ createCrate(34);
 createCrate(48);
 createCrate(65);
 
-// =====================================
 // 9. PLAYER CHARACTER SPRITE
-// =====================================
 
 const player = new THREE.Group();
 
@@ -359,9 +335,7 @@ function loadPlayerCharacter() {
 
 player.position.set(0, -3.9, 1.5);
 
-// =====================================
 // 10. PLAYER STATS AND GAME VARIABLES
-// =====================================
 
 const MAG_SIZE = 12;
 
@@ -401,7 +375,6 @@ const runSpeed = 0.17;
 
 const keys = {};
 
-// SCORE SYSTEM
 const HIGH_SCORE_KEY = "outbreakHighScore";
 let score = 0;
 let highScore = 0;
@@ -435,27 +408,13 @@ function finalizeScore() {
     updateHUD();
 }
 
-// If your player PNG faces LEFT, change this to false
-const SPRITE_FACES_RIGHT = true;
+const SPRITE_FACES_RIGHT = false;
 
-// Random ammo box: 10 to 30 bullets
 function randomAmmo(min = 10, max = 30) {
     return min + Math.floor(Math.random() * (max - min + 1));
 }
 
-// =====================================
 // 11. STORY, MISSIONS AND PROGRESSION
-// =====================================
-
-/*
-   MISSION CHAIN (6 missions)
-   1. First Contact   - Eliminate 3 infected
-   2. Radio Part      - Find the radio part (blue box)
-   3. Hold the Line   - Stay in the radio zone for 40 seconds while waves attack
-   4. Armory          - Find the weapon upgrade crate
-   5. The Brute       - Defeat the giant Brute
-   6. Escape          - Reach the abandoned house (final ambush)
-*/
 
 const TOTAL_MISSIONS = 6;
 const DEFEND_TIME_MS = 40000;
@@ -620,7 +579,6 @@ function checkMissionProgress(dt = 0) {
 
     switch (currentMission) {
 
-        // MISSION 1: FIRST CONTACT
         case 1:
             if (defeatedMonsters >= 3) {
                 advanceMission(
@@ -631,7 +589,6 @@ function checkMissionProgress(dt = 0) {
             }
             break;
 
-        // MISSION 2: FIND THE RADIO PART
         case 2:
             if (radioCollected) {
                 defendRemaining = DEFEND_TIME_MS;
@@ -644,7 +601,6 @@ function checkMissionProgress(dt = 0) {
             }
             break;
 
-        // MISSION 3: HOLD THE LINE
         case 3: {
             const inZone = isInRadioZone();
 
@@ -673,7 +629,6 @@ function checkMissionProgress(dt = 0) {
             break;
         }
 
-        // MISSION 4: WEAPON UPGRADE
         case 4:
             if (collectedWeapon) {
                 advanceMission(
@@ -686,7 +641,6 @@ function checkMissionProgress(dt = 0) {
             }
             break;
 
-        // MISSION 5: DEFEAT THE BRUTE
         case 5:
             if (bruteDefeated) {
                 advanceMission(
@@ -697,7 +651,6 @@ function checkMissionProgress(dt = 0) {
             }
             break;
 
-        // MISSION 6: ESCAPE
         case 6:
             if (player.position.x >= 95) {
                 winGame();
@@ -744,9 +697,7 @@ function winGame() {
     }, 5000);
 }
 
-// =====================================
 // 12. HUD UPDATE
-// =====================================
 
 function updateHUD() {
     const healthDisplay = document.getElementById("health");
@@ -781,9 +732,7 @@ function updateHUD() {
     }
 }
 
-// =====================================
 // 13. PLAYER MOVEMENT AND JUMP
-// =====================================
 
 function jump() {
     if (
@@ -829,7 +778,6 @@ function updatePlayer() {
 
     let landed = false;
 
-    // Ground collision
     if (player.position.y <= -3.9) {
         player.position.y = -3.9;
         velocityY = 0;
@@ -837,7 +785,6 @@ function updatePlayer() {
         landed = true;
     }
 
-    // Platform collision
     if (velocityY <= 0 && !landed) {
         for (const platform of platforms) {
             const overlapsX =
@@ -862,7 +809,6 @@ function updatePlayer() {
         isGrounded = false;
     }
 
-    // When standing still, face the nearest infected
     const isMoving = !isHidden && (moveLeft || moveRight);
 
     if (!isMoving) {
@@ -899,14 +845,11 @@ function updatePlayer() {
         playerSprite.scale.x =
             playerSpriteWidth * facing * (SPRITE_FACES_RIGHT ? 1 : -1);
 
-        // Slightly see-through while hiding
         playerSprite.material.opacity = isHidden ? 0.45 : 1;
     }
 }
 
-// =====================================
 // 14. 3D MONSTER MODEL HELPERS
-// =====================================
 
 const enemies = [];
 
@@ -922,9 +865,7 @@ function makeEnemyPart(parent, geometry, material, x, y, z) {
     return part;
 }
 
-// =====================================
 // 15. ZOMBIE HEALTH BAR
-// =====================================
 
 function createEnemyHealthBar(enemy) {
     const bar = new THREE.Group();
@@ -983,9 +924,7 @@ function updateEnemyHealthBar(enemy) {
         -barWidth * (1 - percentage) / 2;
 }
 
-// =====================================
 // 16. CREATE 3D MONSTERS (zombie / mutant / brute)
-// =====================================
 
 const ENEMY_TYPES = {
     zombie: {
@@ -1054,7 +993,6 @@ function createEnemy(x, type = "zombie") {
     const bodyWidth = isBig ? 0.95 : 0.72;
     const bodyHeight = isBig ? 1.3 : 1.05;
 
-    // Body
     makeEnemyPart(
         enemy,
         new THREE.BoxGeometry(bodyWidth, bodyHeight, 0.45),
@@ -1064,7 +1002,6 @@ function createEnemy(x, type = "zombie") {
         0
     );
 
-    // Neck
     makeEnemyPart(
         enemy,
         new THREE.CylinderGeometry(0.16, 0.2, 0.25, 8),
@@ -1074,7 +1011,6 @@ function createEnemy(x, type = "zombie") {
         0
     );
 
-    // Head
     const head = makeEnemyPart(
         enemy,
         new THREE.SphereGeometry(isBig ? 0.43 : 0.34, 16, 12),
@@ -1084,7 +1020,6 @@ function createEnemy(x, type = "zombie") {
         0.03
     );
 
-    // Jaw
     makeEnemyPart(
         enemy,
         new THREE.BoxGeometry(0.42, 0.16, 0.35),
@@ -1094,7 +1029,6 @@ function createEnemy(x, type = "zombie") {
         0.3
     );
 
-    // Mouth
     makeEnemyPart(
         enemy,
         new THREE.BoxGeometry(0.25, 0.12, 0.035),
@@ -1104,7 +1038,6 @@ function createEnemy(x, type = "zombie") {
         0.47
     );
 
-    // Eyes and eye sockets
     for (const eyeX of [-0.14, 0.14]) {
         makeEnemyPart(
             enemy,
@@ -1125,7 +1058,6 @@ function createEnemy(x, type = "zombie") {
         );
     }
 
-    // Teeth
     for (const toothX of [-0.08, 0, 0.08]) {
         makeEnemyPart(
             enemy,
@@ -1137,7 +1069,6 @@ function createEnemy(x, type = "zombie") {
         );
     }
 
-    // Left arm
     const leftArm = new THREE.Group();
 
     leftArm.position.set(-0.48, 1.55, 0);
@@ -1152,7 +1083,6 @@ function createEnemy(x, type = "zombie") {
         0
     );
 
-    // Right arm
     const rightArm = new THREE.Group();
 
     rightArm.position.set(0.48, 1.55, 0);
@@ -1186,7 +1116,6 @@ function createEnemy(x, type = "zombie") {
         0
     );
 
-    // Left leg
     const leftLeg = new THREE.Group();
 
     leftLeg.position.set(-0.2, 0.65, 0);
@@ -1201,7 +1130,6 @@ function createEnemy(x, type = "zombie") {
         0
     );
 
-    // Right leg
     const rightLeg = new THREE.Group();
 
     rightLeg.position.set(0.2, 0.65, 0);
@@ -1216,7 +1144,6 @@ function createEnemy(x, type = "zombie") {
         0
     );
 
-    // Extra details for mutant and brute
     if (isBig) {
         makeEnemyPart(
             enemy,
@@ -1246,7 +1173,6 @@ function createEnemy(x, type = "zombie") {
         );
     }
 
-    // Brute gets shoulder spikes
     if (type === "brute") {
         for (const sx of [-0.62, 0.62]) {
             makeEnemyPart(
@@ -1260,7 +1186,6 @@ function createEnemy(x, type = "zombie") {
         }
     }
 
-    // Bigger enemies are scaled up from the ground
     enemy.scale.setScalar(stats.size);
     enemy.position.set(x, -3.9, 1.5);
 
@@ -1292,9 +1217,7 @@ function createEnemy(x, type = "zombie") {
     console.log(type.toUpperCase() + " spawned!");
 }
 
-// =====================================
 // 17. MONSTER SPAWNING
-// =====================================
 
 let nextMonsterTime = Infinity;
 
@@ -1325,7 +1248,6 @@ function spawnMonster(forcedType) {
     let type = forcedType;
 
     if (!type) {
-        // More mutants in later missions
         const mutantChance = currentMission >= 5 ? 0.45 : 0.3;
         type = Math.random() < mutantChance ? "mutant" : "zombie";
     }
@@ -1333,7 +1255,6 @@ function spawnMonster(forcedType) {
     createEnemy(spawnX, type);
 }
 
-// How fast and how many enemies spawn in each mission
 function getSpawnSettings() {
     if (currentMission === 1) {
         return { min: 6000, rand: 2000, maxAlive: 3 };
@@ -1357,7 +1278,6 @@ function updateMonsterSpawning() {
 
     if (now < nextMonsterTime) return;
 
-    // Clean up defeated enemies
     for (let i = enemies.length - 1; i >= 0; i--) {
         if (!enemies[i].alive) enemies.splice(i, 1);
     }
@@ -1376,9 +1296,7 @@ function updateMonsterSpawning() {
         now + settings.min + Math.random() * settings.rand;
 }
 
-// =====================================
 // 18. ENEMY AI AND ATTACKS
-// =====================================
 
 function hasCrateBetween(enemyX, playerX) {
     return hidingSpots.some(spot => {
@@ -1405,20 +1323,17 @@ function updateEnemies() {
             player.position.x
         );
 
-        // Move toward player
         if (absoluteDistance < 16 && !(isHidden && blocked)) {
             enemy.mesh.position.x +=
                 Math.sign(distance) * enemy.speed;
         }
 
-        // Face the player (slight side view)
         enemy.mesh.rotation.y = distance < 0 ? -1.2 : 1.2;
 
         if (enemy.healthBar) {
             enemy.healthBar.rotation.y = -enemy.mesh.rotation.y;
         }
 
-        // Walking animation
         const walk =
             Math.sin(now * 0.006 + enemy.walkOffset) * 0.5;
 
@@ -1428,11 +1343,9 @@ function updateEnemies() {
         enemy.leftArm.rotation.x = -0.8 - walk * 0.4;
         enemy.rightArm.rotation.x = -0.8 + walk * 0.4;
 
-        // Head movement
         enemy.head.rotation.z =
             Math.sin(now * 0.002 + enemy.walkOffset) * 0.08;
 
-        // Attack player
         if (
             absoluteDistance < enemy.attackRange &&
             !isHidden &&
@@ -1451,9 +1364,7 @@ function updateEnemies() {
     });
 }
 
-// =====================================
 // 19. SHOOTING AND BULLETS
-// =====================================
 
 const bullets = [];
 
@@ -1561,7 +1472,6 @@ function updateBullets() {
             }
         });
 
-        // Remove bullets that travel too far
         if (
             bullet.alive &&
             Math.abs(
@@ -1573,7 +1483,6 @@ function updateBullets() {
         }
     });
 
-    // Clean up inactive bullets
     for (let i = bullets.length - 1; i >= 0; i--) {
         if (!bullets[i].alive) {
             bullets.splice(i, 1);
@@ -1581,9 +1490,7 @@ function updateBullets() {
     }
 }
 
-// =====================================
 // 20. RELOAD AND MEDKITS
-// =====================================
 
 function reload() {
     if (
@@ -1629,9 +1536,7 @@ function useMedkit() {
     updateHUD();
 }
 
-// =====================================
 // 21. HIDE AND CROUCH
-// =====================================
 
 function toggleHide() {
     if (!gameStarted || gameOver) return;
@@ -1652,11 +1557,8 @@ function toggleHide() {
     }
 }
 
-// =====================================
 // 21B. PAUSE MENU
-// =====================================
 
-// Safe show/hide for the pause menu (won't crash if the HTML is outdated)
 function setPauseScreen(visible) {
     const pauseScreen = document.getElementById("pauseScreen");
 
@@ -1668,14 +1570,12 @@ function setPauseScreen(visible) {
 function pauseGame() {
     if (!gameStarted || gameOver || isPaused) return;
 
-    // No pause menu in the HTML? Don't pause (avoids a frozen game)
     if (!document.getElementById("pauseScreen")) return;
 
     isPaused = true;
     gameStarted = false;
     pausedAt = Date.now();
 
-    // Release any held buttons or keys
     Object.keys(keys).forEach(key => {
         keys[key] = false;
     });
@@ -1705,7 +1605,6 @@ function resumeGame() {
     isPaused = false;
     gameStarted = true;
 
-    // Don't let timers run while the game was paused
     if (nextMonsterTime !== Infinity) {
         nextMonsterTime += pausedFor;
     }
@@ -1735,9 +1634,7 @@ function quitToMenu() {
     updateHUD();
 }
 
-// =====================================
 // 22. SURVIVAL SUPPLIES AND COLLECTIBLES
-// =====================================
 
 const collectibles = [];
 
@@ -1945,7 +1842,6 @@ function updateCollectibles() {
     collectibles.forEach(item => {
         if (item.collected) return;
 
-        // Floating animation
         item.mesh.position.y =
             item.baseY +
             Math.sin(now * 0.003 + item.phase) * 0.12;
@@ -1962,7 +1858,6 @@ function updateCollectibles() {
 
         if (distance < 1.1 && verticalDistance < 1.5) {
 
-            // Mission items can only be picked up during their mission
             const locked =
                 (item.type === "radio" && currentMission !== 2) ||
                 (item.type === "weapon" && currentMission !== 4);
@@ -1980,14 +1875,11 @@ function updateCollectibles() {
     });
 }
 
-// =====================================
 // 23. KEYBOARD CONTROLS
-// =====================================
 
 document.addEventListener("keydown", (event) => {
     const key = event.key.toLowerCase();
 
-    // Pause / resume with P or Escape
     if ((key === "p" || key === "escape") && !event.repeat) {
         if (isPaused) {
             resumeGame();
@@ -2008,7 +1900,6 @@ document.addEventListener("keydown", (event) => {
 
     keys[key] = true;
 
-    // Prevent repeated actions while holding a key
     if (event.repeat) return;
 
     if (
@@ -2047,9 +1938,7 @@ document.addEventListener("keyup", (event) => {
     }
 });
 
-// =====================================
 // 24. CAMERA FOLLOW
-// =====================================
 
 function updateCamera() {
     const targetX = player.position.x + 2;
@@ -2062,9 +1951,7 @@ function updateCamera() {
     camera.lookAt(camera.position.x, CAMERA_Y, 0);
 }
 
-// =====================================
 // 25. GAME OVER
-// =====================================
 
 function endGame() {
     if (gameOver) return;
@@ -2101,9 +1988,7 @@ function endGame() {
     document.getElementById("gameEndScreen").hidden = false;
 }
 
-// =====================================
 // 26. START GAME AND CONTROLS TUTORIAL
-// =====================================
 
 window.beginGame = function () {
     document.getElementById("mainMenu").hidden = true;
@@ -2118,7 +2003,6 @@ window.beginGame = function () {
 
     loadPlayerCharacter();
 
-    // Reset player stats
     score = 0;
     document.getElementById("newRecordText").hidden = true;
 
@@ -2134,7 +2018,6 @@ window.beginGame = function () {
     radioCollected = false;
     bruteDefeated = false;
 
-    // Reset mission state
     defeatedMonsters = 0;
     currentMission = 1;
     defendRemaining = DEFEND_TIME_MS;
@@ -2142,7 +2025,6 @@ window.beginGame = function () {
     lastInZone = null;
     radioLamp.material.color.set(0xaa2222);
 
-    // Reset player position and movement
     player.position.set(0, -3.9, 1.5);
 
     velocityY = 0;
@@ -2153,53 +2035,44 @@ window.beginGame = function () {
     isCrouching = false;
     isRunning = false;
 
-    // Reset game state
     gameOver = false;
     gameWon = false;
     gameStarted = false;
     introFinished = false;
 
-    // Clear pressed keys
     Object.keys(keys).forEach(key => {
         keys[key] = false;
     });
 
-    // Reset timers
     lastDamageTime = 0;
     lastShotTime = 0;
     nextMonsterTime = Infinity;
 
-    // Stop previous story animation
     if (storyTimer) {
         clearInterval(storyTimer);
         storyTimer = null;
     }
 
-    // Remove old monsters
     enemies.forEach(enemy => {
         scene.remove(enemy.mesh);
     });
 
     enemies.length = 0;
 
-    // Remove old bullets
     bullets.forEach(bullet => {
         scene.remove(bullet.mesh);
     });
 
     bullets.length = 0;
 
-    // Remove old collectibles
     collectibles.forEach(item => {
         scene.remove(item.mesh);
     });
 
     collectibles.length = 0;
 
-    // Create fresh collectibles
     createWorldCollectibles();
 
-    // Reset camera
     camera.position.set(0, CAMERA_Y, 25);
     camera.lookAt(0, CAMERA_Y, 0);
 
@@ -2211,7 +2084,6 @@ window.beginGame = function () {
         });
     });
 
-    // Reset story panel
     const sceneTitle = document.getElementById("scene-title");
     const locationText = document.getElementById("location");
     const storyText = document.getElementById("story-text");
@@ -2239,7 +2111,6 @@ window.beginGame = function () {
         startStoryIntro();
     }
 
-    // Request fullscreen and attempt landscape orientation
     if (gameScreen.requestFullscreen) {
         gameScreen.requestFullscreen()
             .then(() => {
@@ -2276,9 +2147,7 @@ window.continueGame = function () {
     startStoryIntro();
 };
 
-// =====================================
 // 27. RESTART GAME
-// =====================================
 
 window.restartGame = function () {
     if (document.fullscreenElement) {
@@ -2290,14 +2159,11 @@ window.restartGame = function () {
     window.location.reload();
 };
 
-// =====================================
-// 28. TOUCH CONTROLS (CIRCLE PAD + ACTION BUTTONS)
-// =====================================
+// 28. TOUCH CONTROLS 
 
 document.querySelectorAll("[data-move]").forEach(button => {
     const action = button.dataset.move;
 
-    // Stop the long-press menu on phones
     button.addEventListener("contextmenu", event => {
         event.preventDefault();
     });
@@ -2336,9 +2202,7 @@ document.querySelectorAll("[data-move]").forEach(button => {
     button.addEventListener("pointercancel", stop);
 });
 
-// =====================================
 // 29. RESIZE
-// =====================================
 
 function resizeGame() {
     const width = Math.max(
@@ -2351,7 +2215,6 @@ function resizeGame() {
         gameContainer.clientHeight || window.innerHeight
     );
 
-    // Keep the same vertical world view.
     const viewHeight = 12;
     const aspect = width / height;
 
@@ -2396,9 +2259,7 @@ document.addEventListener("fullscreenchange", () => {
     });
 });
 
-// =====================================
 // 30. GAME LOOP
-// =====================================
 
 let lastFrameTime = performance.now();
 
@@ -2423,18 +2284,14 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// =====================================
 // 31. CONNECT HTML BUTTONS
-// =====================================
 
-// Character selection buttons
 document.querySelectorAll(".character-option").forEach(button => {
     button.addEventListener("click", () => {
         window.selectCharacter(button.dataset.character);
     });
 });
 
-// Start Game button
 const startGameButton = document.getElementById("startGameButton");
 
 if (startGameButton) {
@@ -2443,7 +2300,6 @@ if (startGameButton) {
     });
 }
 
-// How To Play (main menu): copy the instructions from the in-game overlay
 const instructionsBody = document.getElementById("instructionsBody");
 const menuInstructions = document.getElementById("menuInstructions");
 
@@ -2468,7 +2324,6 @@ if (howToBackButton) {
     });
 }
 
-// Continue button in controls tutorial
 const continueButton = document.getElementById("continueButton");
 
 if (continueButton) {
@@ -2477,7 +2332,6 @@ if (continueButton) {
     });
 }
 
-// Restart Game button (goes straight back into the game)
 const restartButton = document.getElementById("restartButton");
 
 if (restartButton) {
@@ -2487,14 +2341,12 @@ if (restartButton) {
     });
 }
 
-// Quit Game button
 const quitButton = document.getElementById("quitButton");
 
 if (quitButton) {
     quitButton.addEventListener("click", quitToMenu);
 }
 
-// Pause menu buttons
 const pauseButton = document.getElementById("pauseButton");
 const resumeButton = document.getElementById("resumeButton");
 const pauseRestartButton = document.getElementById("pauseRestartButton");
@@ -2519,14 +2371,11 @@ if (pauseQuitButton) {
     pauseQuitButton.addEventListener("click", quitToMenu);
 }
 
-// Auto-pause when the player switches tabs or apps
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) pauseGame();
 });
 
-// =====================================
 // 32. INITIALIZE GAME
-// =====================================
 
 updateHUD();
 animate();

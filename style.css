@@ -28,7 +28,6 @@ body {
     color: #eee;
 }
 
-
 /* =====================================
    MENU SCREENS (REGISTRATION, CHARACTER, MAIN MENU, HOW TO PLAY)
 ===================================== */
@@ -111,7 +110,6 @@ body {
     min-width: 200px;
 }
 
-
 /* =====================================
    INPUT
 ===================================== */
@@ -146,7 +144,6 @@ input:focus {
     font-size: 13px;
     margin-top: 12px;
 }
-
 
 /* =====================================
    BUTTONS
@@ -192,7 +189,6 @@ button:focus-visible {
     background: #a32c2c;
     box-shadow: 0 0 12px #a33b3b;
 }
-
 
 /* =====================================
    CHARACTER SELECTION
@@ -250,9 +246,8 @@ button:focus-visible {
     margin-top: 15px;
 }
 
-
 /* =====================================
-   INTRO SCREENS BACKGROUND
+   INTRO BACKGROUND
 ===================================== */
 
 #signupScreen,
@@ -285,7 +280,6 @@ button:focus-visible {
     position: relative;
     z-index: 1;
 }
-
 
 /* =====================================
    HOW TO PLAY CONTENT (used by menu + in-game overlay)
@@ -342,7 +336,6 @@ button:focus-visible {
     font-weight: bold;
 }
 
-
 /* =====================================
    FULL SCREEN GAMEPLAY
 ===================================== */
@@ -385,7 +378,6 @@ button:focus-visible {
     width: 100%;
     height: 100%;
 }
-
 
 /* =====================================
    PLAYER HUD - TOP LEFT
@@ -441,7 +433,6 @@ button:focus-visible {
     font-weight: bold;
     white-space: nowrap;
 }
-
 
 /* =====================================
    STORY PANEL - TOP CENTER
@@ -506,9 +497,8 @@ button:focus-visible {
     margin-top: 6px;
 }
 
-
 /* =====================================
-   PICKUP / KILL NOTICE
+   PICKUP/ KILL NOTICE
 ===================================== */
 
 .pickup-notice {
@@ -536,9 +526,8 @@ button:focus-visible {
     transition: opacity 0.2s;
 }
 
-
 /* =====================================
-   ROTATE HINT (portrait phones only)
+   ROTATE HINT (mobile)
 ===================================== */
 
 .rotate-hint {
@@ -572,9 +561,8 @@ button:focus-visible {
     }
 }
 
-
 /* =====================================
-   HOW TO PLAY OVERLAY (IN GAME)
+   HOW TO PLAY OVERLAY
 ===================================== */
 
 .controls-overlay {
@@ -637,7 +625,6 @@ button:focus-visible {
     background: #60775b;
 }
 
-
 /* =====================================
    TOUCH CONTROLS: CIRCLE PAD + ACTION BUTTONS
 ===================================== */
@@ -668,7 +655,6 @@ button:focus-visible {
     pointer-events: none;
 }
 
-/* Circle direction pad */
 .dpad {
     width: var(--pad);
     height: var(--pad);
@@ -701,7 +687,6 @@ button:focus-visible {
     height: var(--act);
 }
 
-/* Shared round button style */
 .dpad button,
 .action-pad button {
     position: absolute;
@@ -745,7 +730,6 @@ button:focus-visible {
     transform: scale(0.94);
 }
 
-/* Arrow buttons around the circle */
 .dpad button {
     width: 34%;
     height: 34%;
@@ -758,7 +742,6 @@ button:focus-visible {
 .dpad .left  { left: 3%;   top: 33%; }
 .dpad .right { right: 3%;  top: 33%; }
 
-/* Action buttons arranged in an arc */
 .action-pad button span {
     font-size: calc(var(--act) * 0.1);
     line-height: 1;
@@ -788,7 +771,6 @@ button:focus-visible {
 .act-medkit span {
     color: #ff5a5a;
 }
-
 
 /* =====================================
    GAME END SCREEN
@@ -893,7 +875,6 @@ button:focus-visible {
     background: #465448;
 }
 
-/* Pause menu */
 #pauseScreen h1 {
     color: #a9c69c;
 }
@@ -915,7 +896,6 @@ button:focus-visible {
     background: #3f7a47;
 }
 
-/* Pause button (top right, during gameplay) */
 .pause-button {
     position: absolute;
     top: max(10px, env(safe-area-inset-top));
@@ -940,7 +920,6 @@ button:focus-visible {
     -webkit-tap-highlight-color: transparent;
 }
 
-
 /* =====================================
    TABLET AND SMALL SCREENS
 ===================================== */
@@ -957,7 +936,6 @@ button:focus-visible {
         letter-spacing: 5px;
     }
 }
-
 
 /* =====================================
    PORTRAIT PHONES
@@ -1009,7 +987,6 @@ button:focus-visible {
         font-size: 20px;
     }
 
-    /* Story sits to the right of the HUD */
     .game-story {
         left: calc(clamp(120px, 17vw, 190px) + 20px);
         right: 62px;
@@ -1018,7 +995,6 @@ button:focus-visible {
         max-height: 26dvh;
     }
 }
-
 
 /* =====================================
    PHONES IN LANDSCAPE

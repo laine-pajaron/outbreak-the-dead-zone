@@ -10,8 +10,7 @@
 </head>
 
 <body>
-
-    <!-- 1. PLAYER REGISTRATION -->
+    
     <section id="signupScreen" class="screen">
 
         <div class="screen-content">
@@ -27,13 +26,7 @@
                 ENTER YOUR IDENTIFICATION TO BEGIN
             </p>
 
-            <input
-                type="text"
-                id="usernameInput"
-                placeholder="Enter your username"
-                maxlength="15"
-                autocomplete="off"
-            >
+            <input type="text" id="usernameInput" placeholder="Enter your username" maxlength="15" autocomplete="off">
 
             <button onclick="registerPlayer()">CONTINUE</button>
 
@@ -43,8 +36,6 @@
 
     </section>
 
-
-    <!-- 2. CHARACTER SELECTION -->
     <section id="characterSelection" class="screen" hidden>
 
         <div class="screen-content">
@@ -83,7 +74,6 @@
     </section>
 
 
-    <!-- 3. MAIN MENU -->
     <section id="mainMenu" class="screen" hidden>
 
         <div class="screen-content">
@@ -117,7 +107,6 @@
     </section>
 
 
-    <!-- 3B. HOW TO PLAY (MAIN MENU) -->
     <section id="howToScreen" class="screen" hidden>
 
         <div class="screen-content">
@@ -125,7 +114,6 @@
             <p class="warning">⚠ SURVIVOR TRAINING ⚠</p>
             <h2>HOW TO PLAY</h2>
 
-            <!-- Filled automatically from #instructionsBody by script.js -->
             <div id="menuInstructions" class="how-body"></div>
 
             <button id="howToBackButton">BACK</button>
@@ -135,14 +123,10 @@
     </section>
 
 
-    <!-- 4. MAIN GAME SCREEN -->
     <section id="gameScreen" class="game-screen" hidden>
 
-        <!-- THREE.JS ENVIRONMENT -->
         <div id="game3D"></div>
 
-
-        <!-- PLAYER STATUS: TOP LEFT -->
         <div id="gameHUD" class="game-hud">
 
             <h3 class="hud-title">PLAYER STATUS</h3>
@@ -180,7 +164,6 @@
         </div>
 
 
-        <!-- STORY PANEL: TOP CENTER -->
         <div id="storyPanel" class="game-story">
 
             <div class="story-header">
@@ -198,15 +181,11 @@
         </div>
 
 
-        <!-- PAUSE BUTTON: TOP RIGHT -->
+
         <button id="pauseButton" class="pause-button" aria-label="Pause game">❚❚</button>
 
-
-        <!-- PORTRAIT HINT (shows only on portrait phones) -->
         <div class="rotate-hint">↻ ROTATE YOUR PHONE TO LANDSCAPE FOR THE BEST VIEW</div>
 
-
-        <!-- CONTROLS TUTORIAL (shows before every run) -->
         <div id="controlsOverlay" class="controls-overlay">
 
             <div class="controls-content">
@@ -279,10 +258,7 @@
         </div>
 
 
-        <!-- TOUCH CONTROLS -->
         <div id="mobileControls" class="mobile-controls">
-
-            <!-- Circular direction pad -->
             <div class="dpad">
                 <button class="up"    data-move="jump"   aria-label="Jump">▲</button>
                 <button class="left"  data-move="left"   aria-label="Move left">◀</button>
@@ -290,7 +266,6 @@
                 <button class="down"  data-move="crouch" aria-label="Crouch">▼</button>
             </div>
 
-            <!-- Circular action buttons -->
             <div class="action-pad">
                 <button class="act-run"    data-move="run"><span>⚡</span><small>RUN</small></button>
                 <button class="act-hide"   data-move="hide"><span>📦</span><small>HIDE</small></button>
@@ -301,8 +276,6 @@
 
         </div>
 
-
-        <!-- PAUSE MENU -->
         <div id="pauseScreen" class="game-end-screen" hidden>
             <div class="game-end-content">
 
@@ -324,8 +297,6 @@
             </div>
         </div>
 
-
-        <!-- GAME END SCREEN -->
         <div id="gameEndScreen" class="game-end-screen" hidden>
             <div class="game-end-content">
 
@@ -351,8 +322,6 @@
 
     </section>
 
-
-    <!-- GAME SCRIPT -->
     <script type="module" src="script.js"></script>
 
 </body>
