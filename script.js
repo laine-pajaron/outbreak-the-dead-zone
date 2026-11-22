@@ -1005,12 +1005,25 @@ function spawnMonster() {
     const cameraHalfWidth =
         (camera.right - camera.left) / 2;
 
-    let spawnX = camera.position.x + cameraHalfWidth + 2;
+    // Spawn outside the visible camera area
+    const rightSpawnX =
+        camera.position.x + cameraHalfWidth + 2;
 
-    if (spawnX > 103) {
-        spawnX = Math.max(
-            2,
-            camera.position.x - cameraHalfWidth - 2
+    const leftSpawnX =
+        camera.position.x - cameraHalfWidth - 2;
+
+    let spawnX;
+
+    // Choose a valid side of the player
+    if (rightSpawnX <= 103) {
+        spawnX = rightSpawnX;
+    } else if (leftSpawnX >= 2) {
+        spawnX = leftSpawnX;
+    } else {
+        // Fallback for very wide screens
+        spawnX = Math.min(
+            103,
+            Math.max(2, player.position.x + cameraHalfWidth + 2)
         );
     }
 
@@ -1565,6 +1578,10 @@ document.addEventListener("keyup", (event) => {
 // 24. CAMERA FOLLOW
 // =====================================
 
+// =====================================
+// 24. CAMERA FOLLOW
+// =====================================
+
 function updateCamera() {
     const targetX = player.position.x + 2;
 
@@ -1707,8 +1724,18 @@ window.beginGame = function () {
     createWorldCollectibles();
 
     // Reset camera
-    camera.position.set(0, 0, 25);
-    camera.lookAt(0, 0, 0);
+    // Reset camera
+camera.position.set(0, 0, 25);
+camera.lookAt(0, 0, 0);
+
+// Recalculate camera based on the current screen size
+requestAnimationFrame(() => {
+    resizeGame();
+
+    requestAnimationFrame(() => {
+        resizeGame();
+    });
+});
 
     // Reset story panel
     const sceneTitle = document.getElementById("scene-title");
@@ -1739,11 +1766,30 @@ window.beginGame = function () {
     }
 
     // Request fullscreen
-    if (gameScreen.requestFullscreen) {
-        gameScreen.requestFullscreen().catch(error => {
+ // Request fullscreen and attempt landscape orientation
+if (gameScreen.requestFullscreen) {
+    gameScreen.requestFullscreen()
+        .then(() => {
+            resizeGame();
+
+            // Attempt to lock the phone in landscape
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock("landscape")
+                    .catch(error => {
+                        console.log(
+                            "Landscape lock unavailable:",
+                            error
+                        );
+                    });
+            }
+        })
+        .catch(error => {
             console.log("Fullscreen unavailable:", error);
+            resizeGame();
         });
-    }
+} else {
+    resizeGame();
+}
 };
 
 window.continueGame = function () {
@@ -1838,26 +1884,64 @@ document.querySelectorAll("[data-move]").forEach(button => {
 // =====================================
 
 function resizeGame() {
-    const width =
-        gameContainer.clientWidth || window.innerWidth;
+    const width = Math.max(
+        1,
+        gameContainer.clientWidth || window.innerWidth
+    );
 
-    const height =
-        gameContainer.clientHeight || window.innerHeight;
+    const height = Math.max(
+        1,
+        gameContainer.clientHeight || window.innerHeight
+    );
 
+    // Keep the same vertical world view.
+    // Landscape screens automatically show more horizontal space.
     const viewHeight = 12;
     const aspect = width / height;
 
     camera.left = -(viewHeight * aspect) / 2;
     camera.right = (viewHeight * aspect) / 2;
+
     camera.top = viewHeight / 2;
     camera.bottom = -viewHeight / 2;
 
     camera.updateProjectionMatrix();
 
-    renderer.setSize(width, height);
+    renderer.setPixelRatio(
+        Math.min(window.devicePixelRatio || 1, 2)
+    );
+
+    renderer.setSize(width, height, false);
 }
 
+// Browser window resize
 window.addEventListener("resize", resizeGame);
+
+// Phone orientation change
+window.addEventListener("orientationchange", () => {
+    requestAnimationFrame(() => {
+        resizeGame();
+
+        // Resize again after the browser finishes changing layout
+        requestAnimationFrame(resizeGame);
+    });
+});
+
+// Detect changes in the actual game container
+if ("ResizeObserver" in window) {
+    const gameResizeObserver = new ResizeObserver(() => {
+        resizeGame();
+    });
+
+    gameResizeObserver.observe(gameContainer);
+}
+
+// Fullscreen changes can also change the game dimensions
+document.addEventListener("fullscreenchange", () => {
+    requestAnimationFrame(() => {
+        resizeGame();
+    });
+});
 
 // =====================================
 // 30. GAME LOOP

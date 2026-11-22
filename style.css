@@ -1,3 +1,8 @@
+
+/* =====================================
+   GLOBAL SETTINGS
+===================================== */
+
 * {
     margin: 0;
     padding: 0;
@@ -258,6 +263,8 @@ button:focus-visible {
     box-shadow: none;
 
     z-index: 1000;
+
+    touch-action: none;
 }
 
 
@@ -356,7 +363,7 @@ button:focus-visible {
 
 
 /* =====================================
-   STORY PANEL - CENTER BOTTOM
+   STORY PANEL
 ===================================== */
 
 .game-story {
@@ -380,7 +387,7 @@ button:focus-visible {
 
     z-index: 15;
 
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 .story-header {
@@ -436,12 +443,16 @@ button:focus-visible {
 
     background: rgba(0, 0, 0, 0.68);
     backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
 
     z-index: 30;
+
+    overflow-y: auto;
 }
 
 .controls-content {
     width: min(430px, 100%);
+    max-height: 90dvh;
     padding: 30px;
 
     text-align: center;
@@ -453,6 +464,8 @@ button:focus-visible {
     border-radius: 8px;
 
     box-shadow: 0 0 30px #000;
+
+    overflow-y: auto;
 }
 
 .controls-content h2 {
@@ -497,7 +510,7 @@ button:focus-visible {
 
 
 /* =====================================
-   GAME ACTION BUTTONS - BOTTOM RIGHT
+   MOBILE GAME CONTROLS
 ===================================== */
 
 .mobile-controls {
@@ -542,6 +555,10 @@ button:focus-visible {
     letter-spacing: 1px;
 
     touch-action: none;
+
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-controls button:hover {
@@ -551,7 +568,133 @@ button:focus-visible {
 
 
 /* =====================================
-   RESPONSIVE DESIGN
+   GAME END SCREEN
+===================================== */
+
+.game-end-screen {
+    position: absolute;
+    inset: 0;
+
+    z-index: 100;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    overflow-y: auto;
+}
+
+.game-end-screen[hidden] {
+    display: none !important;
+}
+
+.game-end-content {
+    width: 90%;
+    max-width: 500px;
+    padding: 40px 25px;
+
+    text-align: center;
+
+    background: rgba(15, 22, 18, 0.96);
+
+    border: 1px solid #7b2929;
+    border-radius: 12px;
+
+    box-shadow: 0 0 30px rgba(120, 20, 20, 0.3);
+}
+
+.game-end-content h1 {
+    color: #c83232;
+    font-size: 38px;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+}
+
+.game-end-content p {
+    color: #d5d5d5;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.game-end-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.game-end-buttons button {
+    padding: 14px;
+
+    border: 1px solid #8b3939;
+    background: #572020;
+    color: white;
+
+    font-weight: bold;
+    letter-spacing: 2px;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.game-end-buttons button:hover {
+    background: #8b2929;
+    transform: scale(1.03);
+}
+
+#quitButton {
+    background: #303832;
+    border-color: #58645a;
+}
+
+#quitButton:hover {
+    background: #465448;
+}
+
+
+/* =====================================
+   INTRO SCREENS BACKGROUND
+===================================== */
+
+#signupScreen,
+#characterSelection {
+    background-image: url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    position: relative;
+    overflow: hidden;
+}
+
+#signupScreen::before,
+#characterSelection::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.55);
+
+    z-index: 0;
+}
+
+#signupScreen > *,
+#characterSelection > * {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* =====================================
+   TABLET AND SMALL SCREENS
 ===================================== */
 
 @media (max-width: 700px) {
@@ -569,6 +712,7 @@ button:focus-visible {
     .game-hud {
         top: 10px;
         left: 10px;
+
         width: 150px;
         padding: 9px;
     }
@@ -592,6 +736,7 @@ button:focus-visible {
     .game-story {
         bottom: 15px;
         width: 72%;
+
         min-height: 105px;
         padding: 12px 15px;
     }
@@ -628,9 +773,11 @@ button:focus-visible {
 }
 
 
-/* SMALL MOBILE SCREENS */
+/* =====================================
+   SMALL PORTRAIT MOBILE SCREENS
+===================================== */
 
-@media (max-width: 500px) {
+@media (max-width: 500px) and (orientation: portrait) {
 
     body {
         padding: 10px;
@@ -693,144 +840,499 @@ button:focus-visible {
     }
 }
 
-/* =====================================
-   INTRO SCREENS BACKGROUND
-===================================== */
-
-#signupScreen,
-#characterSelection {
-    background-image: url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Dark overlay para readable ang text */
-#signupScreen::before,
-#characterSelection::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 0;
-}
-
-/* Keep content above the background overlay */
-#signupScreen > *,
-#characterSelection > * {
-    position: relative;
-    z-index: 1;
-}
 
 /* =====================================
-   MANUAL INSTRUCTIONS OVERLAY
+   MOBILE LANDSCAPE LAYOUT
 ===================================== */
 
-.controls-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 20;
+@media screen and (orientation: landscape) and (max-height: 500px) {
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    /* GENERAL PAGE */
 
-    background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-}
+    body {
+        min-height: 100dvh;
+        padding: 0;
+        overflow-x: hidden;
+    }
 
-.controls-overlay .screen-content {
-    background: rgba(10, 10, 10, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    padding: 25px;
-    width: min(90%, 650px);
-    max-height: 85vh;
-    overflow-y: auto;
-    color: white;
-    text-align: center;
-}
 
-/* Instructions remain readable on mobile */
-@media (max-width: 700px) {
-    .controls-overlay .screen-content {
-        width: 90%;
-        padding: 18px;
-        max-height: 90vh;
+    /* REGISTRATION / CHARACTER / MAIN MENU */
+
+    .screen {
+        width: min(94vw, 950px);
+        max-width: 950px;
+
+        min-height: 0;
+        height: 92dvh;
+
+        margin: auto;
+        padding: 12px 22px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        overflow-y: auto;
+    }
+
+    .screen-content {
+        width: 100%;
+        padding: 8px;
+    }
+
+    .screen-content h1 {
+        font-size: clamp(25px, 4vw, 38px);
+        letter-spacing: 5px;
+    }
+
+    .screen-content h2 {
+        margin: 10px 0;
+        font-size: clamp(16px, 2.5vw, 22px);
+    }
+
+    .screen-description {
+        font-size: 10px;
+        margin: 7px 0;
+    }
+
+    .subtitle {
+        font-size: 11px;
+        letter-spacing: 3px;
+    }
+
+    .welcome-text {
+        margin: 12px 0;
+        font-size: 13px;
+    }
+
+    input {
+        width: min(350px, 80%);
+        margin: 12px auto;
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .screen-content > button {
+        min-width: 160px;
+        margin-top: 8px;
+        padding: 10px 18px;
+    }
+
+    .warning {
+        margin-top: 8px;
+        font-size: 10px;
+    }
+
+
+    /* CHARACTER SELECTION */
+
+    .character-options {
+        flex-direction: row;
+        flex-wrap: nowrap;
+
+        justify-content: center;
+        align-items: center;
+
+        gap: clamp(12px, 3vw, 30px);
+
+        margin: 12px 0;
+    }
+
+    .character-card {
+        flex: 0 1 200px;
+
+        width: clamp(130px, 22vw, 200px);
+        max-width: 200px;
+
+        padding: 8px;
+    }
+
+    .character-card img {
+        width: 100%;
+        height: clamp(80px, 22dvh, 145px);
+        object-fit: contain;
+    }
+
+    .character-card p {
+        margin-top: 7px;
+        font-size: 12px;
+    }
+
+    #selectedCharacterText {
+        margin-top: 7px;
+        font-size: 12px;
+    }
+
+
+    /* GAME SCREEN */
+
+    .game-screen {
+        position: fixed;
+        inset: 0;
+
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+
+        overflow: hidden;
+        touch-action: none;
+    }
+
+    .game-screen #game3D {
+        position: absolute;
+        inset: 0;
+
+        width: 100%;
+        height: 100%;
+    }
+
+
+    /* HUD */
+
+    .game-hud {
+        top: max(7px, env(safe-area-inset-top));
+        left: max(7px, env(safe-area-inset-left));
+
+        width: clamp(115px, 18vw, 160px);
+        padding: 7px 9px;
+    }
+
+    .hud-title {
+        font-size: 11px;
+        padding-bottom: 5px;
+    }
+
+    .hud-stat {
+        padding: 5px 0;
+    }
+
+    .hud-stat span:first-child {
+        font-size: 9px;
+    }
+
+    .hud-stat span:last-child {
+        font-size: 12px;
+    }
+
+
+    /* STORY PANEL */
+
+    .game-story {
+        left: 50%;
+        bottom: calc(65px + env(safe-area-inset-bottom));
+
+        transform: translateX(-50%);
+
+        width: min(55vw, 600px);
+        max-width: 600px;
+
+        min-height: 0;
+        max-height: 23dvh;
+
+        padding: 7px 11px;
+
+        overflow-y: auto;
+    }
+
+    .story-header {
+        margin-bottom: 4px;
+    }
+
+    .game-story #location {
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    .game-story #scene-title {
+        font-size: 12px;
+        margin-top: 3px;
+    }
+
+    .game-story #story-text {
+        font-size: 10px;
+        line-height: 1.35;
+    }
+
+    .game-story #mission-text {
+        font-size: 9px;
+        margin-top: 4px;
+    }
+
+
+    /* MOBILE CONTROLS */
+
+    .mobile-controls {
+        position: absolute;
+
+        left: max(10px, env(safe-area-inset-left));
+        right: max(10px, env(safe-area-inset-right));
+
+        bottom: max(7px, env(safe-area-inset-bottom));
+
+        display: flex;
+        flex-direction: row;
+
+        justify-content: space-between;
+        align-items: flex-end;
+
+        gap: 8px;
+    }
+
+    .movement-pad {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .interact-button {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .mobile-controls button {
+        min-width: 46px;
+        min-height: 38px;
+
+        padding: 6px 8px;
+
+        font-size: 9px;
+        letter-spacing: 0;
+    }
+
+
+    /* CONTROLS TUTORIAL */
+
+    .controls-overlay {
+        padding: 8px;
+        overflow-y: auto;
+    }
+
+    .controls-content {
+        width: min(600px, 90vw);
+        max-height: 92dvh;
+
+        padding: 10px 18px;
+
+        overflow-y: auto;
+    }
+
+    .controls-content h2 {
+        font-size: clamp(17px, 3vw, 23px);
+        letter-spacing: 2px;
+        margin: 5px 0 10px;
+    }
+
+    .control-list {
+        margin-bottom: 10px;
+    }
+
+    .control-list p {
+        padding: 5px 0;
+        font-size: 10px;
+    }
+
+    #continueButton {
+        padding: 9px;
+        font-size: 11px;
+    }
+
+
+    /* GAME END SCREEN */
+
+    .game-end-screen {
+        padding: 8px;
+    }
+
+    .game-end-content {
+        width: min(420px, 85vw);
+        max-width: 420px;
+
+        padding: 14px 20px;
+    }
+
+    .game-end-content h1 {
+        font-size: clamp(23px, 4vw, 32px);
+        margin-bottom: 8px;
+    }
+
+    .game-end-content p {
+        font-size: 11px;
+        line-height: 1.4;
+        margin-bottom: 12px;
+    }
+
+    .game-end-buttons {
+        flex-direction: row;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .game-end-buttons button {
+        flex: 1;
+        padding: 9px 7px;
+        font-size: 9px;
+        letter-spacing: 1px;
     }
 }
 
-/* GAME END SCREEN */
-.game-end-screen {
-    position: absolute;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(5px);
+
+/* =====================================
+   EXTRA SMALL LANDSCAPE PHONES
+===================================== */
+
+@media screen and (orientation: landscape) and (max-height: 380px) {
+
+    .screen {
+        width: 96vw;
+        height: 96dvh;
+        padding: 7px 14px;
+    }
+
+    .screen-content {
+        padding: 5px;
+    }
+
+    .screen-content h1 {
+        font-size: 24px;
+        letter-spacing: 3px;
+    }
+
+    .screen-content h2 {
+        font-size: 15px;
+        margin: 6px 0;
+    }
+
+    .screen-description {
+        font-size: 9px;
+        margin: 5px 0;
+    }
+
+    input {
+        margin: 8px auto;
+        padding: 8px;
+    }
+
+    .character-options {
+        gap: 10px;
+        margin: 7px 0;
+    }
+
+    .character-card {
+        width: 125px;
+        padding: 6px;
+    }
+
+    .character-card img {
+        height: 75px;
+    }
+
+    .character-card p {
+        margin-top: 5px;
+        font-size: 10px;
+    }
+
+    .game-hud {
+        width: 108px;
+        padding: 5px 7px;
+    }
+
+    .hud-title {
+        font-size: 9px;
+        padding-bottom: 4px;
+    }
+
+    .hud-stat {
+        padding: 3px 0;
+    }
+
+    .hud-stat span:first-child {
+        font-size: 8px;
+    }
+
+    .hud-stat span:last-child {
+        font-size: 10px;
+    }
+
+    .game-story {
+        bottom: 55px;
+        width: 52vw;
+        max-height: 21dvh;
+        padding: 5px 8px;
+    }
+
+    .game-story #location {
+        font-size: 7px;
+    }
+
+    .game-story #scene-title {
+        font-size: 10px;
+    }
+
+    .game-story #story-text {
+        font-size: 9px;
+        line-height: 1.25;
+    }
+
+    .mobile-controls button {
+        min-width: 39px;
+        min-height: 32px;
+        padding: 5px;
+        font-size: 8px;
+    }
+
+    .controls-content {
+        padding: 7px 12px;
+    }
+
+    .controls-content h2 {
+        font-size: 16px;
+        margin: 3px 0 6px;
+    }
+
+    .control-list {
+        margin-bottom: 5px;
+    }
+
+    .control-list p {
+        padding: 3px 0;
+        font-size: 9px;
+    }
+
+    #continueButton {
+        padding: 7px;
+        font-size: 10px;
+    }
+
+    .game-end-content {
+        padding: 10px 15px;
+    }
+
+    .game-end-content h1 {
+        font-size: 22px;
+        margin-bottom: 5px;
+    }
+
+    .game-end-content p {
+        font-size: 10px;
+        margin-bottom: 7px;
+    }
 }
 
-.game-end-screen[hidden] {
-    display: none !important;
+
+/* =====================================
+   TOUCH SCREEN IMPROVEMENTS
+===================================== */
+
+.mobile-controls button {
+    -webkit-user-select: none;
+    user-select: none;
+
+    -webkit-tap-highlight-color: transparent;
 }
 
-.game-end-content {
-    width: 90%;
-    max-width: 500px;
-    padding: 40px 25px;
-    text-align: center;
-    background: rgba(15, 22, 18, 0.96);
-    border: 1px solid #7b2929;
-    border-radius: 12px;
-    box-shadow: 0 0 30px rgba(120, 20, 20, 0.3);
-}
-
-.game-end-content h1 {
-    color: #c83232;
-    font-size: 38px;
-    letter-spacing: 4px;
-    margin-bottom: 20px;
-}
-
-.game-end-content p {
-    color: #d5d5d5;
-    font-size: 15px;
-    line-height: 1.6;
-    margin-bottom: 30px;
-}
-
-.game-end-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.game-end-buttons button {
-    padding: 14px;
-    border: 1px solid #8b3939;
-    background: #572020;
-    color: white;
-    font-weight: bold;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.game-end-buttons button:hover {
-    background: #8b2929;
-    transform: scale(1.03);
-}
-
-#quitButton {
-    background: #303832;
-    border-color: #58645a;
-}
-
-#quitButton:hover {
-    background: #465448;
+.game-screen button {
+    touch-action: manipulation;
 }
