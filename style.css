@@ -1336,3 +1336,210 @@ button:focus-visible {
 .game-screen button {
     touch-action: manipulation;
 }
+
+
+/* =====================================
+   MOBILE LANDSCAPE GAME LAYOUT
+===================================== */
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+
+    /* Fullscreen game area */
+    .game-screen {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    /* Main 3D gameplay */
+    #game3D {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    #game3D canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* HUD stays at the top */
+    .game-hud {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        z-index: 20;
+        max-width: 42%;
+        font-size: 11px;
+    }
+
+    /* Story panel stays at the bottom center */
+    .game-story {
+        position: absolute;
+        left: 50%;
+        bottom: max(8px, env(safe-area-inset-bottom));
+        transform: translateX(-50%);
+
+        width: min(58%, 620px);
+        max-width: 620px;
+
+        min-height: 0;
+        max-height: 22dvh;
+
+        overflow-y: auto;
+        box-sizing: border-box;
+
+        padding: 7px 12px;
+        margin: 0;
+
+        z-index: 15;
+        font-size: 11px;
+        line-height: 1.35;
+    }
+
+    /* Mobile controls stay visible above the story panel */
+    .mobile-controls {
+        position: absolute;
+
+        left: 12px;
+        right: 12px;
+        bottom: calc(22dvh + 18px);
+
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+
+        width: auto;
+        gap: 12px;
+
+        z-index: 30;
+        pointer-events: none;
+    }
+
+    .mobile-controls button {
+        pointer-events: auto;
+        min-width: 48px;
+        min-height: 42px;
+        padding: 7px 10px;
+        font-size: 11px;
+        touch-action: none;
+    }
+
+    /* Movement buttons on the left */
+    .movement-pad {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 7px;
+    }
+
+    /* Action buttons on the right */
+    .interact-button {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 7px;
+        max-width: 48%;
+    }
+
+    /* Controls tutorial */
+    .controls-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 50;
+        overflow-y: auto;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    .controls-content {
+        width: min(90%, 480px);
+        max-height: 90dvh;
+        overflow-y: auto;
+        padding: 14px;
+        box-sizing: border-box;
+    }
+
+    .controls-content h2 {
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+
+    .controls-content p,
+    .controls-content li {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    /* Game over / mission complete */
+    .game-end-screen {
+        position: absolute;
+        inset: 0;
+        z-index: 60;
+        overflow-y: auto;
+        padding: 12px;
+        box-sizing: border-box;
+    }
+
+    .game-end-content {
+        width: min(90%, 450px);
+        padding: 16px;
+    }
+
+    .game-end-content h1 {
+        font-size: 25px;
+    }
+
+    .game-end-content p {
+        font-size: 12px;
+    }
+
+    .game-end-buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .game-end-buttons button {
+        min-height: 40px;
+        font-size: 11px;
+        padding: 8px 12px;
+    }
+}
+
+/* Extra short landscape screens */
+@media screen and (orientation: landscape) and (max-height: 380px) {
+
+    .game-story {
+        max-height: 19dvh;
+        width: min(55%, 560px);
+        font-size: 10px;
+        padding: 5px 9px;
+    }
+
+    .mobile-controls {
+        bottom: calc(19dvh + 15px);
+    }
+
+    .mobile-controls button {
+        min-width: 42px;
+        min-height: 36px;
+        font-size: 10px;
+    }
+
+    .game-hud {
+        top: 5px;
+        left: 7px;
+        font-size: 10px;
+    }
+}
