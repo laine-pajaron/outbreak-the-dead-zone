@@ -1551,3 +1551,63 @@ button:focus-visible {
         font-size: 10px;
     }
 }
+
+/* =====================================
+   MOBILE LAYOUT FIX
+   Story = taas | Character = gitna | Buttons = baba
+===================================== */
+
+@media (max-width: 900px), (max-height: 500px) {
+
+    .game-story {
+        top: max(8px, env(safe-area-inset-top));
+        bottom: auto;
+        left: 50%;
+        transform: translateX(-50%);
+
+        width: min(52vw, 600px);
+        max-width: 600px;
+
+        min-height: 0;
+        max-height: 28dvh;
+
+        overflow-y: auto;
+    }
+
+    .mobile-controls {
+        top: auto;
+        left: max(10px, env(safe-area-inset-left));
+        right: max(10px, env(safe-area-inset-right));
+        bottom: max(8px, env(safe-area-inset-bottom));
+
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+
+        pointer-events: none;
+    }
+
+    .mobile-controls button {
+        pointer-events: auto;
+    }
+
+    .interact-button {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        max-width: 55%;
+    }
+}
+
+/* Portrait: ilagay ang story sa kanan ng HUD */
+@media (max-width: 700px) and (orientation: portrait) {
+
+    .game-story {
+        left: 168px;
+        right: 8px;
+        transform: none;
+        width: auto;
+        max-width: none;
+        max-height: 26dvh;
+    }
+}

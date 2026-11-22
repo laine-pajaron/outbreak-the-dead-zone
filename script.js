@@ -50,8 +50,9 @@ scene.fog = new THREE.Fog(0x080e0b, 35, 90);
 
 const camera = new THREE.OrthographicCamera(-10, 10, 6, -6, 0.1, 100);
 
-camera.position.set(0, 0, 25);
-camera.lookAt(0, 0, 0);
+const CAMERA_Y = -1.5; 
+camera.position.set(0, CAMERA_Y, 25);
+camera.lookAt(0, CAMERA_Y, 0);
 
 const renderer = new THREE.WebGLRenderer({
     antialias: true
@@ -148,14 +149,14 @@ textureLoader.load(
             fog: false
         });
 
-        const backgroundGeometry = new THREE.PlaneGeometry(140, 12);
+        const backgroundGeometry = new THREE.PlaneGeometry(140, 16);
 
         backgroundPlane = new THREE.Mesh(
             backgroundGeometry,
             backgroundMaterial
         );
 
-        backgroundPlane.position.set(52.5, 0, -8);
+        backgroundPlane.position.set(52.5, CAMERA_Y, -8);
         backgroundPlane.renderOrder = -10;
 
         scene.add(backgroundPlane);
@@ -206,7 +207,7 @@ for (let x = -10; x < 120; x += 8) {
 const platforms = [];
 
 function addPlatform(x, y, width) {
-    makeBox(x, y, 0, width, 0.45, 2, mat.platform);
+    makeBox(55, -5.9, 0, 130, 4, 4, mat.ground);
 
     platforms.push({
         x: x - width / 2,
@@ -295,12 +296,15 @@ function loadPlayerCharacter() {
             playerSpriteWidth = playerSpriteHeight * aspect;
 
             const material = new THREE.SpriteMaterial({
-                map: texture,
-                transparent: true
-            });
+                 map: texture,
+                 transparent: true,
+                 depthTest: false,
+                 fog: false
+             });
+        
 
             playerSprite = new THREE.Sprite(material);
-
+            playerSprite.renderOrder = 20; 
             playerSprite.scale.set(
                 playerSpriteWidth,
                 playerSpriteHeight,
@@ -394,6 +398,9 @@ function typeStory(text, callback) {
     storyTimer = setInterval(() => {
         storyText.textContent += text.charAt(index);
         index++;
+        
+         const panel = document.getElementById("storyPanel");   
+         if (panel) panel.scrollTop = panel.scrollHeight;        
 
         if (index >= text.length) {
             clearInterval(storyTimer);
@@ -1319,7 +1326,7 @@ function showPickupNotice(message) {
 
         Object.assign(notice.style, {
             position: "absolute",
-            top: "22%",
+            top: "42%",
             left: "50%",
             transform: "translateX(-50%)",
             padding: "12px 22px",
@@ -1578,17 +1585,14 @@ document.addEventListener("keyup", (event) => {
 // 24. CAMERA FOLLOW
 // =====================================
 
-// =====================================
-// 24. CAMERA FOLLOW
-// =====================================
-
 function updateCamera() {
     const targetX = player.position.x + 2;
 
     camera.position.x +=
         (targetX - camera.position.x) * 0.08;
+         camera.position.y = CAMERA_Y;
 
-    camera.lookAt(camera.position.x, 0, 0);
+    camera.lookAt(camera.position.x, CAMERA_Y, 0);
 }
 
 // =====================================
@@ -1724,9 +1728,8 @@ window.beginGame = function () {
     createWorldCollectibles();
 
     // Reset camera
-    // Reset camera
-camera.position.set(0, 0, 25);
-camera.lookAt(0, 0, 0);
+camera.position.set(0, CAMERA_Y, 25);
+camera.lookAt(0, CAMERA_Y, 0);
 
 // Recalculate camera based on the current screen size
 requestAnimationFrame(() => {
