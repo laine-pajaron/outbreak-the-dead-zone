@@ -1380,28 +1380,32 @@ button:focus-visible {
     }
 
     /* Story panel stays at the bottom center */
-    .game-story {
-        position: absolute;
-        left: 50%;
-        bottom: max(8px, env(safe-area-inset-bottom));
-        transform: translateX(-50%);
+   .game-story {
+    position: absolute;
 
-        width: min(58%, 620px);
-        max-width: 620px;
+    top: 75px;
+    bottom: auto;
+    left: 50%;
 
-        min-height: 0;
-        max-height: 22dvh;
+    transform: translateX(-50%);
 
-        overflow-y: auto;
-        box-sizing: border-box;
+    width: min(52%, 580px);
+    max-width: 580px;
 
-        padding: 7px 12px;
-        margin: 0;
+    min-height: 0;
+    max-height: 18dvh;
 
-        z-index: 15;
-        font-size: 11px;
-        line-height: 1.35;
-    }
+    overflow-y: auto;
+    box-sizing: border-box;
+
+    padding: 7px 12px;
+    margin: 0;
+
+    z-index: 15;
+
+    font-size: 11px;
+    line-height: 1.35;
+}
 
     /* Mobile controls stay visible above the story panel */
     .mobile-controls {
@@ -1521,10 +1525,14 @@ button:focus-visible {
 @media screen and (orientation: landscape) and (max-height: 380px) {
 
     .game-story {
-        max-height: 19dvh;
-        width: min(55%, 560px);
-        font-size: 10px;
-        padding: 5px 9px;
+    top: 55px;
+    bottom: auto;
+
+    width: 48vw;
+    max-height: 16dvh;
+
+    padding: 5px 8px;
+
     }
 
     .mobile-controls {
