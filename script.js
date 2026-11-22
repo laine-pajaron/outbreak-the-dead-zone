@@ -433,7 +433,7 @@ function finalizeScore() {
 }
 
 // If your player PNG faces LEFT, change this to false
-const SPRITE_FACES_RIGHT = true;
+const SPRITE_FACES_RIGHT = false;
 
 // Random ammo box: 10 to 30 bullets
 function randomAmmo(min = 10, max = 30) {
