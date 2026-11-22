@@ -1656,8 +1656,20 @@ function toggleHide() {
 // 21B. PAUSE MENU
 // =====================================
 
+// Safe show/hide for the pause menu (won't crash if the HTML is outdated)
+function setPauseScreen(visible) {
+    const pauseScreen = document.getElementById("pauseScreen");
+
+    if (pauseScreen) {
+        pauseScreen.hidden = !visible;
+    }
+}
+
 function pauseGame() {
     if (!gameStarted || gameOver || isPaused) return;
+
+    // No pause menu in the HTML? Don't pause (avoids a frozen game)
+    if (!document.getElementById("pauseScreen")) return;
 
     isPaused = true;
     gameStarted = false;
@@ -1682,7 +1694,7 @@ function pauseGame() {
             getMissionText();
     }
 
-    document.getElementById("pauseScreen").hidden = false;
+    setPauseScreen(true);
 }
 
 function resumeGame() {
@@ -1700,7 +1712,7 @@ function resumeGame() {
 
     lastDamageTime += pausedFor;
 
-    document.getElementById("pauseScreen").hidden = true;
+    setPauseScreen(false);
 }
 
 function quitToMenu() {
@@ -1712,7 +1724,7 @@ function quitToMenu() {
 
     isPaused = false;
 
-    document.getElementById("pauseScreen").hidden = true;
+    setPauseScreen(false);
     document.getElementById("gameEndScreen").hidden = true;
     document.getElementById("gameScreen").hidden = true;
     document.getElementById("mainMenu").hidden = false;
@@ -2102,7 +2114,7 @@ window.beginGame = function () {
     gameScreen.hidden = false;
 
     isPaused = false;
-    document.getElementById("pauseScreen").hidden = true;
+    setPauseScreen(false);
 
     loadPlayerCharacter();
 
@@ -2498,7 +2510,7 @@ if (resumeButton) {
 
 if (pauseRestartButton) {
     pauseRestartButton.addEventListener("click", () => {
-        document.getElementById("pauseScreen").hidden = true;
+        setPauseScreen(false);
         window.beginGame();
     });
 }
