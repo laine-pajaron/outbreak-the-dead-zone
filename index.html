@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -100,13 +99,36 @@
                 <span id="displayUsername"></span>
             </p>
 
-            <p class="welcome-text">HIGH SCORE: <span id="menuHighScore">0</span></p>
+            <p class="welcome-text">
+                HIGH SCORE: <span id="menuHighScore">0</span>
+            </p>
 
-            <button id="startGameButton">START GAME</button>
+            <div class="menu-buttons">
+                <button id="startGameButton">START GAME</button>
+                <button id="howToButton">HOW TO PLAY</button>
+            </div>
 
             <p class="screen-description">
                 SURVIVE THE OUTBREAK. ESCAPE THE DEAD ZONE.
             </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- 3B. HOW TO PLAY (MAIN MENU) -->
+    <section id="howToScreen" class="screen" hidden>
+
+        <div class="screen-content">
+
+            <p class="warning">⚠ SURVIVOR TRAINING ⚠</p>
+            <h2>HOW TO PLAY</h2>
+
+            <!-- Filled automatically from #instructionsBody by script.js -->
+            <div id="menuInstructions" class="how-body"></div>
+
+            <button id="howToBackButton">BACK</button>
 
         </div>
 
@@ -136,13 +158,13 @@
             </div>
 
             <div class="hud-stat">
-                <span>🎒 MEDKITS</span>
+                <span>✚ MEDKITS</span>
                 <span id="medkits">2</span>
             </div>
 
             <div class="hud-stat">
-                <span>INVENTORY</span>
-                <span id="items">0</span>
+                <span>🔧 WEAPON</span>
+                <span id="items">LV. 1</span>
             </div>
 
             <div class="hud-stat">
@@ -151,14 +173,14 @@
             </div>
 
             <div class="hud-stat">
-                 <span>🏆 BEST</span>
+                <span>🏆 BEST</span>
                 <span id="highScore">0</span>
             </div>
 
         </div>
 
 
-        <!-- STORY PANEL: CENTER BOTTOM -->
+        <!-- STORY PANEL: TOP CENTER -->
         <div id="storyPanel" class="game-story">
 
             <div class="story-header">
@@ -176,7 +198,11 @@
         </div>
 
 
-        <!-- CONTROLS TUTORIAL -->
+        <!-- PORTRAIT HINT (shows only on portrait phones) -->
+        <div class="rotate-hint">↻ ROTATE YOUR PHONE TO LANDSCAPE FOR THE BEST VIEW</div>
+
+
+        <!-- CONTROLS TUTORIAL (shows before every run) -->
         <div id="controlsOverlay" class="controls-overlay">
 
             <div class="controls-content">
@@ -185,16 +211,60 @@
 
                 <h2>HOW TO PLAY</h2>
 
-                <div class="control-list">
+                <div id="instructionsBody" class="how-body">
 
-                    <p><span>WASD / ARROW KEYS</span> MOVE</p>
-                    <p><span>SPACE</span> JUMP</p>
-                    <p><span>SHIFT</span> RUN</p>
-                    <p><span>J</span> SHOOT</p>
-                    <p><span>R</span> RELOAD</p>
-                    <p><span>H</span> USE MEDKIT</p>
-                    <p><span>E</span> HIDE</p>
-                    <p><span>S</span> CROUCH</p>
+                    <div class="how-section how-wide">
+                        <h3>🎯 OBJECTIVE</h3>
+                        <p class="how-text">
+                            Survive the infected forest and complete all 6 missions:
+                            clear the first wave, find the radio part, hold the radio zone
+                            for 40 seconds, grab the weapon upgrade, defeat the giant Brute,
+                            then reach the abandoned house. You earn points for kills,
+                            supplies and missions. Your best score is saved on this device.
+                        </p>
+                    </div>
+
+                    <div class="how-grid">
+
+                        <div class="how-section">
+                            <h3>🖥 PC (KEYBOARD)</h3>
+                            <div class="control-list">
+                                <p><span>A / D or ← →</span> MOVE</p>
+                                <p><span>W / ↑ / SPACE</span> JUMP</p>
+                                <p><span>SHIFT</span> RUN</p>
+                                <p><span>S</span> CROUCH</p>
+                                <p><span>J</span> SHOOT</p>
+                                <p><span>R</span> RELOAD</p>
+                                <p><span>H</span> USE MEDKIT</p>
+                                <p><span>E</span> HIDE (NEAR A CRATE)</p>
+                            </div>
+                        </div>
+
+                        <div class="how-section">
+                            <h3>📱 MOBILE (TOUCH)</h3>
+                            <div class="control-list">
+                                <p><span>CIRCLE PAD ◀ ▶</span> MOVE</p>
+                                <p><span>CIRCLE PAD ▲</span> JUMP</p>
+                                <p><span>CIRCLE PAD ▼</span> CROUCH</p>
+                                <p><span>⚡ RUN (HOLD)</span> RUN</p>
+                                <p><span>🔫 SHOOT</span> FIRE</p>
+                                <p><span>🔄 RELOAD</span> RELOAD</p>
+                                <p><span>✚ MEDKIT</span> HEAL +35</p>
+                                <p><span>HIDE</span> HIDE (NEAR A CRATE)</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="how-section how-wide">
+                        <h3>💡 TIPS</h3>
+                        <p class="how-text">
+                            • Ammo boxes give 10 to 30 bullets, so don't waste shots.<br>
+                            • Mutants are bigger and tougher. The Brute is huge, slow, and hits very hard.<br>
+                            • Hide behind a crate so zombies on the other side lose you.<br>
+                            • Use a medkit before your health runs out. It can't go above 100.
+                        </p>
+                    </div>
 
                 </div>
 
@@ -205,48 +275,53 @@
         </div>
 
 
-        <!-- GAME ACTION BUTTONS -->
+        <!-- TOUCH CONTROLS -->
         <div id="mobileControls" class="mobile-controls">
 
-            <div class="movement-pad">
-
-                <button data-move="left">◀</button>
-                <button data-move="right">▶</button>
-                <button data-move="jump">JUMP</button>
-
+            <!-- Circular direction pad -->
+            <div class="dpad">
+                <button class="up"    data-move="jump"   aria-label="Jump">▲</button>
+                <button class="left"  data-move="left"   aria-label="Move left">◀</button>
+                <button class="right" data-move="right"  aria-label="Move right">▶</button>
+                <button class="down"  data-move="crouch" aria-label="Crouch">▼</button>
             </div>
 
-            <div class="interact-button">
-
-                <button data-move="shoot">SHOOT</button>
-                <button data-move="reload">RELOAD</button>
-                <button data-move="hide">HIDE</button>
-
+            <!-- Circular action buttons -->
+            <div class="action-pad">
+                <button class="act-run"    data-move="run"><span>⚡</span><small>RUN</small></button>
+                <button class="act-hide"   data-move="hide"><span>📦</span><small>HIDE</small></button>
+                <button class="act-medkit" data-move="medkit"><span>✚</span><small>MEDKIT</small></button>
+                <button class="act-reload" data-move="reload"><span>🔄</span><small>RELOAD</small></button>
+                <button class="act-shoot"  data-move="shoot"><span>🔫</span><small>SHOOT</small></button>
             </div>
 
         </div>
+
 
         <!-- GAME END SCREEN -->
         <div id="gameEndScreen" class="game-end-screen" hidden>
-    <div class="game-end-content">
-        <h1 id="gameEndTitle">GAME OVER</h1>
+            <div class="game-end-content">
 
-        <p id="gameEndMessage">
-            You have been overrun by the infected.
-        </p>
+                <h1 id="gameEndTitle">GAME OVER</h1>
 
-        <div class="game-end-scores">
-       <p>SCORE: <span id="finalScore">0</span></p>
-       <p>HIGH SCORE: <span id="finalHighScore">0</span></p>
-       <p id="newRecordText" hidden>★ NEW HIGH SCORE! ★</p>
-      </div>
+                <p id="gameEndMessage">
+                    You have been overrun by the infected.
+                </p>
 
-        <div class="game-end-buttons">
-            <button id="restartButton">RESTART GAME</button>
-            <button id="quitButton">QUIT GAME</button>
+                <div class="game-end-scores">
+                    <p>SCORE: <span id="finalScore">0</span></p>
+                    <p>HIGH SCORE: <span id="finalHighScore">0</span></p>
+                    <p id="newRecordText" hidden>★ NEW HIGH SCORE! ★</p>
+                </div>
+
+                <div class="game-end-buttons">
+                    <button id="restartButton">RESTART GAME</button>
+                    <button id="quitButton">QUIT GAME</button>
+                </div>
+
+            </div>
         </div>
-      </div>
-    </div>
+
     </section>
 
 

@@ -3,7 +3,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.m
 console.log("OUTBREAK: THE DEAD ZONE");
 
 // =====================================
-// 1. PLAYER INFORMATION
+// 1. PLAYER INFORMATION + MENUS
 // =====================================
 
 let playerUsername = "";
@@ -50,7 +50,7 @@ scene.fog = new THREE.Fog(0x080e0b, 35, 90);
 
 const camera = new THREE.OrthographicCamera(-10, 10, 6, -6, 0.1, 100);
 
-const CAMERA_Y = -1.5; 
+const CAMERA_Y = -1.5;
 camera.position.set(0, CAMERA_Y, 25);
 camera.lookAt(0, CAMERA_Y, 0);
 
@@ -143,7 +143,6 @@ textureLoader.load(
     (texture) => {
         texture.colorSpace = THREE.SRGBColorSpace;
 
-        // I-ulit ang image para hindi mauunat
         texture.wrapS = THREE.MirroredRepeatWrapping;
         texture.repeat.set(140 / 32, 1);
 
@@ -167,7 +166,6 @@ textureLoader.load(
 
         console.log("Forest background loaded!");
     },
-
 
     undefined,
 
@@ -242,6 +240,33 @@ for (let x = 5; x < 110; x += 20) {
     makeBox(x, 3.7, 0, 1.2, 0.12, 0.2, mat.red);
 }
 
+// Radio transmitter tower + defense zone marker (Mission 3)
+const RADIO_ZONE_LEFT = 36;
+const RADIO_ZONE_RIGHT = 56;
+
+makeBox(43, -2.3, -0.5, 0.35, 3.2, 0.35, mat.metal);
+
+const radioLamp = new THREE.Mesh(
+    new THREE.BoxGeometry(0.6, 0.3, 0.3),
+    new THREE.MeshBasicMaterial({ color: 0xaa2222 })
+);
+
+radioLamp.position.set(43, -0.55, -0.5);
+scene.add(radioLamp);
+
+const zoneStrip = new THREE.Mesh(
+    new THREE.BoxGeometry(RADIO_ZONE_RIGHT - RADIO_ZONE_LEFT, 0.03, 0.6),
+    new THREE.MeshBasicMaterial({
+        color: 0x4cff88,
+        transparent: true,
+        opacity: 0.25,
+        depthWrite: false
+    })
+);
+
+zoneStrip.position.set((RADIO_ZONE_LEFT + RADIO_ZONE_RIGHT) / 2, -3.88, 1.2);
+scene.add(zoneStrip);
+
 // =====================================
 // 8. HIDING CRATES
 // =====================================
@@ -277,12 +302,10 @@ let playerSpriteWidth = 1.5;
 let playerSpriteHeight = 2.5;
 
 function loadPlayerCharacter() {
-
-    // FIX: Match the character IDs in index.html
-   const characterPath =
-    selectedCharacter === "player1"
-        ? "images/player1.png"
-        : "images/player2.png";
+    const characterPath =
+        selectedCharacter === "player1"
+            ? "images/player1.png"
+            : "images/player2.png";
 
     textureLoader.load(
         characterPath,
@@ -301,15 +324,15 @@ function loadPlayerCharacter() {
             playerSpriteWidth = playerSpriteHeight * aspect;
 
             const material = new THREE.SpriteMaterial({
-                 map: texture,
-                 transparent: true,
-                 depthTest: false,
-                 fog: false
-             });
-        
+                map: texture,
+                transparent: true,
+                depthTest: false,
+                fog: false
+            });
 
             playerSprite = new THREE.Sprite(material);
-            playerSprite.renderOrder = 20; 
+            playerSprite.renderOrder = 20;
+
             playerSprite.scale.set(
                 playerSpriteWidth,
                 playerSpriteHeight,
@@ -340,17 +363,19 @@ player.position.set(0, -3.9, 1.5);
 // 10. PLAYER STATS AND GAME VARIABLES
 // =====================================
 
+const MAG_SIZE = 12;
+
 let health = 100;
-let ammo = 12;
-let reserveAmmo = 48;
-let medkits = 3;
+let ammo = MAG_SIZE;
+let reserveAmmo = 36;
+let medkits = 2;
 
 let bulletDamage = 20;
 let weaponLevel = 1;
 
-let collectedMedkits = 0;
-let collectedAmmo = 0;
 let collectedWeapon = false;
+let radioCollected = false;
+let bruteDefeated = false;
 
 let isGrounded = true;
 let isHidden = false;
@@ -407,19 +432,40 @@ function finalizeScore() {
     updateHUD();
 }
 
-// WALK ANIMATION
-const SPRITE_FACES_RIGHT = true;  
-let walkTime = 0;
+// If your player PNG faces LEFT, change this to false
+const SPRITE_FACES_RIGHT = true;
+
+// Random ammo box: 10 to 30 bullets
+function randomAmmo(min = 10, max = 30) {
+    return min + Math.floor(Math.random() * (max - min + 1));
+}
 
 // =====================================
 // 11. STORY, MISSIONS AND PROGRESSION
 // =====================================
+
+/*
+   MISSION CHAIN (6 missions)
+   1. First Contact   - Eliminate 3 infected
+   2. Radio Part      - Find the radio part (blue box)
+   3. Hold the Line   - Stay in the radio zone for 40 seconds while waves attack
+   4. Armory          - Find the weapon upgrade crate
+   5. The Brute       - Defeat the giant Brute
+   6. Escape          - Reach the abandoned house (final ambush)
+*/
+
+const TOTAL_MISSIONS = 6;
+const DEFEND_TIME_MS = 40000;
 
 let storyTimer = null;
 let introFinished = false;
 
 let defeatedMonsters = 0;
 let currentMission = 1;
+
+let defendRemaining = DEFEND_TIME_MS;
+let lastDefendSecs = -1;
+let lastInZone = null;
 
 function typeStory(text, callback) {
     const storyText = document.getElementById("story-text");
@@ -441,9 +487,9 @@ function typeStory(text, callback) {
     storyTimer = setInterval(() => {
         storyText.textContent += text.charAt(index);
         index++;
-        
-         const panel = document.getElementById("storyPanel");   
-         if (panel) panel.scrollTop = panel.scrollHeight;        
+
+        const panel = document.getElementById("storyPanel");
+        if (panel) panel.scrollTop = panel.scrollHeight;
 
         if (index >= text.length) {
             clearInterval(storyTimer);
@@ -451,7 +497,7 @@ function typeStory(text, callback) {
 
             if (callback) callback();
         }
-    }, 35);
+    }, 30);
 }
 
 function updateMission(text) {
@@ -460,6 +506,70 @@ function updateMission(text) {
     if (missionText) {
         missionText.textContent = "MISSION: " + text;
     }
+}
+
+function getMissionText() {
+    switch (currentMission) {
+        case 1:
+            return "Eliminate 3 infected (" +
+                Math.min(defeatedMonsters, 3) + "/3).";
+
+        case 2:
+            return "Find the radio part (blue box) near the crates ahead.";
+
+        case 3: {
+            const inZone = isInRadioZone();
+            const secs = Math.ceil(defendRemaining / 1000);
+
+            return inZone
+                ? "Hold the radio zone. Signal ready in " + secs + "s."
+                : "Return to the GREEN radio zone! Timer paused (" + secs + "s left).";
+        }
+
+        case 4:
+            return "Find the weapon upgrade crate (green box) ahead.";
+
+        case 5:
+            return "Defeat the BRUTE. It's slow but hits very hard.";
+
+        case 6:
+            return "Reach the abandoned house at the end of the forest. Ambush!";
+
+        default:
+            return "";
+    }
+}
+
+function refreshMissionText() {
+    const missionText = document.getElementById("mission-text");
+
+    if (missionText) {
+        missionText.textContent =
+            "MISSION " + currentMission + "/" + TOTAL_MISSIONS + ": " +
+            getMissionText();
+    }
+}
+
+function isInRadioZone() {
+    return (
+        player.position.x >= RADIO_ZONE_LEFT &&
+        player.position.x <= RADIO_ZONE_RIGHT
+    );
+}
+
+function advanceMission(next, story, bonus) {
+    currentMission = next;
+
+    lastDefendSecs = -1;
+    lastInZone = null;
+
+    if (bonus) {
+        addScore(bonus);
+        showPickupNotice("MISSION COMPLETE  +" + bonus);
+    }
+
+    refreshMissionText();
+    typeStory(story);
 }
 
 function startStoryIntro() {
@@ -495,63 +605,101 @@ function startStoryIntro() {
                     "\n\n[ SOMETHING IS APPROACHING... ]";
             }
 
-            firstMonsterTime = Date.now() + 2500;
-            monsterSpawned = false;
+            nextMonsterTime = Date.now() + 2500;
 
-            updateMission("Defeat the first infected.");
+            refreshMissionText();
         }
     );
 }
 
-function checkMissionProgress() {
+function checkMissionProgress(dt = 0) {
     if (gameOver || gameWon || !introFinished) return;
 
-    // MISSION 1: DEFEAT FIRST INFECTED
-    if (currentMission === 1 && defeatedMonsters >= 1) {
-        currentMission = 2;
+    switch (currentMission) {
 
-        updateMission("Collect 2 medkits and 1 ammo supply.");
+        // MISSION 1: FIRST CONTACT
+        case 1:
+            if (defeatedMonsters >= 3) {
+                advanceMission(
+                    2,
+                    "The first wave is down, but the noise will bring more. Somewhere ahead, near the old crates, a radio part is lying in the dirt. Without it, there is no way to call for help.",
+                    150
+                );
+            }
+            break;
 
-        typeStory(
-            "The infected falls to the ground. You notice a few abandoned supplies nearby. Collect them before moving deeper into the forest."
-        );
-    }
+        // MISSION 2: FIND THE RADIO PART
+        case 2:
+            if (radioCollected) {
+                defendRemaining = DEFEND_TIME_MS;
 
-    // MISSION 2: COLLECT SUPPLIES
-    if (
-        currentMission === 2 &&
-        collectedMedkits >= 2 &&
-        collectedAmmo >= 1
-    ) {
-        currentMission = 3;
+                advanceMission(
+                    3,
+                    "You plug the radio part into the old transmitter. The signal needs 40 seconds to calibrate, and the infected can hear it. Stay inside the green zone and hold the line.",
+                    150
+                );
+            }
+            break;
 
-        updateMission("Find and collect the weapon upgrade.");
+        // MISSION 3: HOLD THE LINE
+        case 3: {
+            const inZone = isInRadioZone();
 
-        typeStory(
-            "You have gathered enough medical supplies and ammunition. As you continue exploring, you notice a weapon left behind near the abandoned structures. It might give you a better chance of surviving."
-        );
-    }
+            if (inZone && dt > 0) {
+                defendRemaining = Math.max(0, defendRemaining - dt);
+            }
 
-    // MISSION 3: WEAPON UPGRADE
-    if (currentMission === 3 && collectedWeapon) {
-        currentMission = 4;
+            const secs = Math.ceil(defendRemaining / 1000);
 
-        updateMission(
-            "Defeat 3 infected in total and reach the abandoned house."
-        );
+            if (inZone !== lastInZone || secs !== lastDefendSecs) {
+                lastInZone = inZone;
+                lastDefendSecs = secs;
+                refreshMissionText();
+            }
 
-        typeStory(
-            "You pick up the weapon and check its condition. It is still usable. More infected are approaching. Clear the area and reach the abandoned house."
-        );
-    }
+            if (defendRemaining <= 0) {
+                radioLamp.material.color.set(0x37d67a);
 
-    // MISSION 4: FINAL OBJECTIVE
-    if (
-        currentMission === 4 &&
-        defeatedMonsters >= 3 &&
-        player.position.x >= 95
-    ) {
-        winGame();
+                advanceMission(
+                    4,
+                    "The signal goes out. A distant voice crackles back: 'Hold on, we're coming.' Rescue is hours away. A weapon crate was left in the forest ahead, and you will need it.",
+                    300
+                );
+            }
+
+            break;
+        }
+
+        // MISSION 4: WEAPON UPGRADE
+        case 4:
+            if (collectedWeapon) {
+                advanceMission(
+                    5,
+                    "The upgraded weapon feels solid in your hands. Then the ground shakes. Something huge is crashing through the trees toward you. It's a BRUTE.",
+                    200
+                );
+
+                spawnMonster("brute");
+            }
+            break;
+
+        // MISSION 5: DEFEAT THE BRUTE
+        case 5:
+            if (bruteDefeated) {
+                advanceMission(
+                    6,
+                    "The Brute collapses with a thunderous crash. The abandoned house is just ahead, but the noise has woken everything in the forest. Run for it!",
+                    500
+                );
+            }
+            break;
+
+        // MISSION 6: ESCAPE
+        case 6:
+            if (player.position.x >= 95) {
+                winGame();
+            }
+            break;
     }
 }
 
@@ -564,7 +712,7 @@ function winGame() {
 
     updateMission("MISSION COMPLETE!");
 
-    addScore(500 + health * 5);   
+    addScore(500 + health * 5);
     finalizeScore();
 
     const sceneTitle = document.getElementById("scene-title");
@@ -583,15 +731,14 @@ function winGame() {
     );
 
     setTimeout(() => {
-    document.getElementById("gameEndTitle").textContent =
-        "MISSION COMPLETE";
+        document.getElementById("gameEndTitle").textContent =
+            "MISSION COMPLETE";
 
-    document.getElementById("gameEndMessage").textContent =
-        "You survived the night. But the nightmare may not be over.";
+        document.getElementById("gameEndMessage").textContent =
+            "You survived the night. But the nightmare may not be over.";
 
-    document.getElementById("gameEndScreen").hidden = false;
-}, 5000);
-
+        document.getElementById("gameEndScreen").hidden = false;
+    }, 5000);
 }
 
 // =====================================
@@ -627,9 +774,7 @@ function updateHUD() {
     const items = document.getElementById("items");
 
     if (items) {
-            items.textContent = isHidden
-            ? "HIDDEN"
-            : "WEAPON LV. " + weaponLevel;
+        items.textContent = "LV. " + weaponLevel;
     }
 }
 
@@ -654,13 +799,16 @@ function updatePlayer() {
 
     const speed = isRunning ? runSpeed : walkSpeed;
 
+    const moveLeft = keys.a || keys.arrowleft;
+    const moveRight = keys.d || keys.arrowright;
+
     if (!isHidden) {
-        if (keys.a || keys.arrowleft) {
+        if (moveLeft) {
             player.position.x -= speed;
             facing = -1;
         }
 
-        if (keys.d || keys.arrowright) {
+        if (moveRight) {
             player.position.x += speed;
             facing = 1;
         }
@@ -711,12 +859,9 @@ function updatePlayer() {
         isGrounded = false;
     }
 
-    // Gumagalaw ba ang player?
-    const isMoving =
-        !isHidden &&
-        (keys.a || keys.d || keys.arrowleft || keys.arrowright);
+    // When standing still, face the nearest infected
+    const isMoving = !isHidden && (moveLeft || moveRight);
 
-    // Kapag nakatayo, humarap sa pinakamalapit na zombie
     if (!isMoving) {
         let nearest = null;
         let nearestDist = 12;
@@ -724,7 +869,9 @@ function updatePlayer() {
         for (const enemy of enemies) {
             if (!enemy.alive) continue;
 
-            const d = Math.abs(enemy.mesh.position.x - player.position.x);
+            const d = Math.abs(
+                enemy.mesh.position.x - player.position.x
+            );
 
             if (d < nearestDist) {
                 nearest = enemy;
@@ -733,7 +880,8 @@ function updatePlayer() {
         }
 
         if (nearest) {
-            facing = nearest.mesh.position.x > player.position.x ? 1 : -1;
+            facing =
+                nearest.mesh.position.x > player.position.x ? 1 : -1;
         }
     }
 
@@ -748,17 +896,8 @@ function updatePlayer() {
         playerSprite.scale.x =
             playerSpriteWidth * facing * (SPRITE_FACES_RIGHT ? 1 : -1);
 
-        // Walking bob at sway
-        if (isMoving && isGrounded) {
-            walkTime += isRunning ? 0.4 : 0.28;
-
-            playerSprite.position.y = Math.abs(Math.sin(walkTime)) * 0.12;
-            playerSprite.material.rotation = Math.sin(walkTime) * 0.06;
-        } else {
-            walkTime = 0;
-            playerSprite.position.y = 0;
-            playerSprite.material.rotation = 0;
-        }
+        // Slightly see-through while hiding
+        playerSprite.material.opacity = isHidden ? 0.45 : 1;
     }
 }
 
@@ -842,16 +981,53 @@ function updateEnemyHealthBar(enemy) {
 }
 
 // =====================================
-// 16. CREATE 3D MONSTERS
+// 16. CREATE 3D MONSTERS (zombie / mutant / brute)
 // =====================================
 
+const ENEMY_TYPES = {
+    zombie: {
+        size: 1,
+        health: 40,
+        speed: 0.025,
+        damage: 10,
+        skin: 0x68785b,
+        eye: 0xe6e4a0,
+        points: 100,
+        label: "INFECTED ELIMINATED"
+    },
+
+    mutant: {
+        size: 1.25,
+        health: 90,
+        speed: 0.035,
+        damage: 18,
+        skin: 0x753d3d,
+        eye: 0xff1616,
+        points: 250,
+        label: "MUTANT ELIMINATED"
+    },
+
+    brute: {
+        size: 1.8,
+        health: 200,
+        speed: 0.017,
+        damage: 30,
+        skin: 0x4f3a33,
+        eye: 0xff3b1a,
+        points: 600,
+        label: "THE BRUTE IS DOWN!"
+    }
+};
+
 function createEnemy(x, type = "zombie") {
+    const stats = ENEMY_TYPES[type] || ENEMY_TYPES.zombie;
+    const isBig = type !== "zombie";
     const isMutant = type === "mutant";
 
     const enemy = new THREE.Group();
 
     const skinMaterial = new THREE.MeshStandardMaterial({
-        color: isMutant ? 0x753d3d : 0x68785b,
+        color: stats.skin,
         roughness: 1
     });
 
@@ -865,15 +1041,15 @@ function createEnemy(x, type = "zombie") {
     });
 
     const eyeMaterial = new THREE.MeshBasicMaterial({
-        color: isMutant ? 0xff1616 : 0xe6e4a0
+        color: stats.eye
     });
 
     const teethMaterial = new THREE.MeshStandardMaterial({
         color: 0xd5d0b7
     });
 
-    const bodyWidth = isMutant ? 0.95 : 0.72;
-    const bodyHeight = isMutant ? 1.3 : 1.05;
+    const bodyWidth = isBig ? 0.95 : 0.72;
+    const bodyHeight = isBig ? 1.3 : 1.05;
 
     // Body
     makeEnemyPart(
@@ -898,7 +1074,7 @@ function createEnemy(x, type = "zombie") {
     // Head
     const head = makeEnemyPart(
         enemy,
-        new THREE.SphereGeometry(isMutant ? 0.43 : 0.34, 16, 12),
+        new THREE.SphereGeometry(isBig ? 0.43 : 0.34, 16, 12),
         skinMaterial,
         0,
         2.1,
@@ -1037,8 +1213,8 @@ function createEnemy(x, type = "zombie") {
         0
     );
 
-    // Extra mutant details
-    if (isMutant) {
+    // Extra details for mutant and brute
+    if (isBig) {
         makeEnemyPart(
             enemy,
             new THREE.ConeGeometry(0.13, 0.4, 6),
@@ -1067,6 +1243,22 @@ function createEnemy(x, type = "zombie") {
         );
     }
 
+    // Brute gets shoulder spikes
+    if (type === "brute") {
+        for (const sx of [-0.62, 0.62]) {
+            makeEnemyPart(
+                enemy,
+                new THREE.ConeGeometry(0.14, 0.45, 6),
+                darkMaterial,
+                sx,
+                1.85,
+                0
+            );
+        }
+    }
+
+    // Bigger enemies are scaled up from the ground
+    enemy.scale.setScalar(stats.size);
     enemy.position.set(x, -3.9, 1.5);
 
     scene.add(enemy);
@@ -1074,10 +1266,13 @@ function createEnemy(x, type = "zombie") {
     const enemyData = {
         mesh: enemy,
         type,
-        health: isMutant ? 80 : 40,
-        speed: isMutant ? 0.035 : 0.025,
-        damage: isMutant ? 18 : 10,
-        attackRange: 1.25,
+        size: stats.size,
+        health: stats.health,
+        speed: stats.speed,
+        damage: stats.damage,
+        points: stats.points,
+        label: stats.label,
+        attackRange: 1.25 * stats.size,
         alive: true,
         head,
         leftLeg,
@@ -1098,11 +1293,9 @@ function createEnemy(x, type = "zombie") {
 // 17. MONSTER SPAWNING
 // =====================================
 
-let firstMonsterTime = Infinity;
-let nextMonsterTime = 0;
-let monsterSpawned = false;
+let nextMonsterTime = Infinity;
 
-function spawnMonster() {
+function spawnMonster(forcedType) {
     const cameraHalfWidth =
         (camera.right - camera.left) / 2;
 
@@ -1115,24 +1308,43 @@ function spawnMonster() {
 
     let spawnX;
 
-    // Choose a valid side of the player
     if (rightSpawnX <= 103) {
         spawnX = rightSpawnX;
     } else if (leftSpawnX >= 2) {
         spawnX = leftSpawnX;
     } else {
-        // Fallback for very wide screens
         spawnX = Math.min(
             103,
             Math.max(2, player.position.x + cameraHalfWidth + 2)
         );
     }
 
-    const type = Math.random() < 0.7 ? "zombie" : "mutant";
+    let type = forcedType;
+
+    if (!type) {
+        // More mutants in later missions
+        const mutantChance = currentMission >= 5 ? 0.45 : 0.3;
+        type = Math.random() < mutantChance ? "mutant" : "zombie";
+    }
 
     createEnemy(spawnX, type);
+}
 
-    monsterSpawned = true;
+// How fast and how many enemies spawn in each mission
+function getSpawnSettings() {
+    if (currentMission === 1) {
+        return { min: 6000, rand: 2000, maxAlive: 3 };
+    }
+
+    if (currentMission === 3) {
+        return { min: 3500, rand: 1500, maxAlive: 5 };
+    }
+
+    if (currentMission === 6) {
+        return { min: 5000, rand: 2500, maxAlive: 5 };
+    }
+
+    return { min: 8000, rand: 3000, maxAlive: 4 };
 }
 
 function updateMonsterSpawning() {
@@ -1140,24 +1352,25 @@ function updateMonsterSpawning() {
 
     const now = Date.now();
 
-    if (!monsterSpawned && now >= firstMonsterTime) {
+    if (now < nextMonsterTime) return;
+
+    // Clean up defeated enemies
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        if (!enemies[i].alive) enemies.splice(i, 1);
+    }
+
+    const settings = getSpawnSettings();
+
+    const aliveRegular = enemies.filter(
+        enemy => enemy.alive && enemy.type !== "brute"
+    ).length;
+
+    if (aliveRegular < settings.maxAlive) {
         spawnMonster();
-
-        nextMonsterTime = now + 9000;
-        return;
     }
 
-    if (monsterSpawned && now >= nextMonsterTime) {
-        const aliveEnemies = enemies.filter(
-            enemy => enemy.alive
-        ).length;
-
-        if (aliveEnemies < 4) {
-            spawnMonster();
-        }
-
-        nextMonsterTime = now + 9000 + Math.random() * 4000;
-    }
+    nextMonsterTime =
+        now + settings.min + Math.random() * settings.rand;
 }
 
 // =====================================
@@ -1195,23 +1408,22 @@ function updateEnemies() {
                 Math.sign(distance) * enemy.speed;
         }
 
-        // Face player
+        // Face the player (slight side view)
         enemy.mesh.rotation.y = distance < 0 ? -1.2 : 1.2;
 
         if (enemy.healthBar) {
             enemy.healthBar.rotation.y = -enemy.mesh.rotation.y;
         }
 
-
         // Walking animation
-       const walk =
+        const walk =
             Math.sin(now * 0.006 + enemy.walkOffset) * 0.5;
 
         enemy.leftLeg.rotation.x = walk;
         enemy.rightLeg.rotation.x = -walk;
 
         enemy.leftArm.rotation.x = -0.8 - walk * 0.4;
-        enemy.rightArm.rotation.x = -0.8 + walk * 0.4;;
+        enemy.rightArm.rotation.x = -0.8 + walk * 0.4;
 
         // Head movement
         enemy.head.rotation.z =
@@ -1246,9 +1458,15 @@ function shoot() {
     if (
         !gameStarted ||
         gameOver ||
-        ammo <= 0 ||
         isHidden
     ) {
+        return;
+    }
+
+    if (ammo <= 0) {
+        showPickupNotice(
+            reserveAmmo > 0 ? "OUT OF AMMO - RELOAD!" : "NO AMMO LEFT!"
+        );
         return;
     }
 
@@ -1296,13 +1514,18 @@ function updateBullets() {
                 bullet.mesh.position.x - enemy.mesh.position.x
             );
 
-            const enemyTargetY = enemy.mesh.position.y + 1.2;
+            // Bigger enemies have bigger hitboxes
+            const enemyTargetY =
+                enemy.mesh.position.y + 1.2 * enemy.size;
 
             const distanceY = Math.abs(
                 bullet.mesh.position.y - enemyTargetY
             );
 
-            if (distanceX < 0.7 && distanceY < 1.4) {
+            if (
+                distanceX < 0.7 * enemy.size &&
+                distanceY < 1.4 * enemy.size
+            ) {
                 enemy.health -= bulletDamage;
 
                 bullet.alive = false;
@@ -1318,14 +1541,17 @@ function updateBullets() {
 
                     defeatedMonsters++;
 
-                    addScore(enemy.type === "mutant" ? 250 : 100);
+                    if (enemy.type === "brute") {
+                        bruteDefeated = true;
+                    }
 
-                    showPickupNotice("INFECTED ELIMINATED");
+                    addScore(enemy.points);
 
-                    console.log(
-                        "Monster defeated! Total:",
-                        defeatedMonsters
-                    );
+                    showPickupNotice(enemy.label);
+
+                    if (currentMission === 1) {
+                        refreshMissionText();
+                    }
 
                     checkMissionProgress();
                 }
@@ -1360,13 +1586,17 @@ function reload() {
     if (
         !gameStarted ||
         gameOver ||
-        ammo === 12 ||
-        reserveAmmo <= 0
+        ammo === MAG_SIZE
     ) {
         return;
     }
 
-    const needed = 12 - ammo;
+    if (reserveAmmo <= 0) {
+        showPickupNotice("NO RESERVE AMMO");
+        return;
+    }
+
+    const needed = MAG_SIZE - ammo;
     const amount = Math.min(needed, reserveAmmo);
 
     ammo += amount;
@@ -1376,17 +1606,22 @@ function reload() {
 }
 
 function useMedkit() {
-    if (
-        !gameStarted ||
-        gameOver ||
-        medkits <= 0 ||
-        health >= 100
-    ) {
+    if (!gameStarted || gameOver) return;
+
+    if (medkits <= 0) {
+        showPickupNotice("NO MEDKITS LEFT");
+        return;
+    }
+
+    if (health >= 100) {
+        showPickupNotice("HEALTH ALREADY FULL");
         return;
     }
 
     health = Math.min(100, health + 35);
     medkits--;
+
+    showPickupNotice("+35 HEALTH");
 
     updateHUD();
 }
@@ -1406,6 +1641,8 @@ function toggleHide() {
         isHidden = !isHidden;
         isCrouching = isHidden;
 
+        showPickupNotice(isHidden ? "HIDING" : "LEFT HIDING SPOT");
+
         updateHUD();
     } else {
         isCrouching = !isCrouching;
@@ -1418,31 +1655,15 @@ function toggleHide() {
 
 const collectibles = [];
 
+let lastLockedHint = 0;
+
 function showPickupNotice(message) {
     let notice = document.getElementById("pickupNotice");
 
     if (!notice) {
         notice = document.createElement("div");
         notice.id = "pickupNotice";
-
-        Object.assign(notice.style, {
-            position: "absolute",
-            top: "42%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            padding: "12px 22px",
-            background: "rgba(12, 20, 15, 0.92)",
-            border: "1px solid #8b332d",
-            color: "#f0e5d8",
-            fontSize: "14px",
-            fontWeight: "bold",
-            letterSpacing: "2px",
-            textAlign: "center",
-            zIndex: "50",
-            pointerEvents: "none",
-            opacity: "0",
-            transition: "opacity 0.2s"
-        });
+        notice.className = "pickup-notice";
 
         document.getElementById("gameScreen").appendChild(notice);
     }
@@ -1465,6 +1686,7 @@ function createCollectible(x, type) {
             type === "medkit" ? 0xe5e5dc :
             type === "ammo" ? 0xb58a3c :
             type === "weapon" ? 0x526b55 :
+            type === "radio" ? 0x3b6ea5 :
             0x65513b,
         roughness: 0.8
     });
@@ -1525,6 +1747,19 @@ function createCollectible(x, type) {
         item.add(weaponPart);
     }
 
+    if (type === "radio") {
+        const antenna = new THREE.Mesh(
+            new THREE.BoxGeometry(0.06, 0.5, 0.06),
+            new THREE.MeshBasicMaterial({
+                color: 0x9fd0ff
+            })
+        );
+
+        antenna.position.set(0.2, 0.45, 0.2);
+
+        item.add(antenna);
+    }
+
     if (type === "supply") {
         const lid = new THREE.Mesh(
             new THREE.BoxGeometry(0.72, 0.1, 0.5),
@@ -1556,9 +1791,13 @@ function createWorldCollectibles() {
     createCollectible(11, "medkit");
     createCollectible(25, "ammo");
     createCollectible(39, "medkit");
+    createCollectible(46, "radio");
     createCollectible(53, "ammo");
+    createCollectible(58, "medkit");
+    createCollectible(64, "ammo");
     createCollectible(70, "weapon");
-    createCollectible(84, "supply");
+    createCollectible(80, "ammo");
+    createCollectible(86, "supply");
 }
 
 function collectItem(item) {
@@ -1571,17 +1810,24 @@ function collectItem(item) {
     if (item.type === "medkit") {
         addScore(25);
         medkits++;
-        collectedMedkits++;
 
         showPickupNotice("+1 MEDKIT COLLECTED");
     }
 
     else if (item.type === "ammo") {
-        addScore(25);
-        reserveAmmo += 24;
-        collectedAmmo++;
+        const amount = randomAmmo(10, 30);
 
-        showPickupNotice("+24 AMMO COLLECTED");
+        addScore(25);
+        reserveAmmo += amount;
+
+        showPickupNotice("+" + amount + " AMMO COLLECTED");
+    }
+
+    else if (item.type === "radio") {
+        addScore(100);
+        radioCollected = true;
+
+        showPickupNotice("RADIO PART FOUND!");
     }
 
     else if (item.type === "weapon") {
@@ -1594,11 +1840,13 @@ function collectItem(item) {
     }
 
     else if (item.type === "supply") {
+        const amount = randomAmmo(10, 20);
+
         addScore(50);
         medkits++;
-        reserveAmmo += 12;
+        reserveAmmo += amount;
 
-        showPickupNotice("SUPPLY CRATE: +1 MEDKIT, +12 AMMO");
+        showPickupNotice("SUPPLY CRATE: +1 MEDKIT, +" + amount + " AMMO");
     }
 
     updateHUD();
@@ -1606,13 +1854,15 @@ function collectItem(item) {
 }
 
 function updateCollectibles() {
+    const now = Date.now();
+
     collectibles.forEach(item => {
         if (item.collected) return;
 
         // Floating animation
         item.mesh.position.y =
             item.baseY +
-            Math.sin(Date.now() * 0.003 + item.phase) * 0.12;
+            Math.sin(now * 0.003 + item.phase) * 0.12;
 
         item.mesh.rotation.y += 0.01;
 
@@ -1625,6 +1875,20 @@ function updateCollectibles() {
         );
 
         if (distance < 1.1 && verticalDistance < 1.5) {
+
+            // Mission items can only be picked up during their mission
+            const locked =
+                (item.type === "radio" && currentMission !== 2) ||
+                (item.type === "weapon" && currentMission !== 4);
+
+            if (locked) {
+                if (now - lastLockedHint > 2500) {
+                    lastLockedHint = now;
+                    showPickupNotice("FINISH YOUR CURRENT MISSION FIRST");
+                }
+                return;
+            }
+
             collectItem(item);
         }
     });
@@ -1695,7 +1959,8 @@ function updateCamera() {
 
     camera.position.x +=
         (targetX - camera.position.x) * 0.08;
-         camera.position.y = CAMERA_Y;
+
+    camera.position.y = CAMERA_Y;
 
     camera.lookAt(camera.position.x, CAMERA_Y, 0);
 }
@@ -1756,23 +2021,28 @@ window.beginGame = function () {
     // Reset player stats
     score = 0;
     document.getElementById("newRecordText").hidden = true;
+
     health = 100;
-    ammo = 12;
-    reserveAmmo = 48;
-    medkits = 3;
+    ammo = MAG_SIZE;
+    reserveAmmo = 36;
+    medkits = 2;
 
     bulletDamage = 20;
     weaponLevel = 1;
 
-    collectedMedkits = 0;
-    collectedAmmo = 0;
     collectedWeapon = false;
+    radioCollected = false;
+    bruteDefeated = false;
 
-    isRunning = false;
-    isHidden = false;
-    isCrouching = false;
+    // Reset mission state
+    defeatedMonsters = 0;
+    currentMission = 1;
+    defendRemaining = DEFEND_TIME_MS;
+    lastDefendSecs = -1;
+    lastInZone = null;
+    radioLamp.material.color.set(0xaa2222);
 
-    // Reset player position
+    // Reset player position and movement
     player.position.set(0, -3.9, 1.5);
 
     velocityY = 0;
@@ -1789,9 +2059,6 @@ window.beginGame = function () {
     gameStarted = false;
     introFinished = false;
 
-    defeatedMonsters = 0;
-    currentMission = 1;
-
     // Clear pressed keys
     Object.keys(keys).forEach(key => {
         keys[key] = false;
@@ -1800,10 +2067,7 @@ window.beginGame = function () {
     // Reset timers
     lastDamageTime = 0;
     lastShotTime = 0;
-
-    firstMonsterTime = Infinity;
-    nextMonsterTime = 0;
-    monsterSpawned = false;
+    nextMonsterTime = Infinity;
 
     // Stop previous story animation
     if (storyTimer) {
@@ -1836,17 +2100,16 @@ window.beginGame = function () {
     createWorldCollectibles();
 
     // Reset camera
-camera.position.set(0, CAMERA_Y, 25);
-camera.lookAt(0, CAMERA_Y, 0);
-
-// Recalculate camera based on the current screen size
-requestAnimationFrame(() => {
-    resizeGame();
+    camera.position.set(0, CAMERA_Y, 25);
+    camera.lookAt(0, CAMERA_Y, 0);
 
     requestAnimationFrame(() => {
         resizeGame();
+
+        requestAnimationFrame(() => {
+            resizeGame();
+        });
     });
-});
 
     // Reset story panel
     const sceneTitle = document.getElementById("scene-title");
@@ -1876,31 +2139,29 @@ requestAnimationFrame(() => {
         startStoryIntro();
     }
 
-    // Request fullscreen
- // Request fullscreen and attempt landscape orientation
-if (gameScreen.requestFullscreen) {
-    gameScreen.requestFullscreen()
-        .then(() => {
-            resizeGame();
+    // Request fullscreen and attempt landscape orientation
+    if (gameScreen.requestFullscreen) {
+        gameScreen.requestFullscreen()
+            .then(() => {
+                resizeGame();
 
-            // Attempt to lock the phone in landscape
-            if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock("landscape")
-                    .catch(error => {
-                        console.log(
-                            "Landscape lock unavailable:",
-                            error
-                        );
-                    });
-            }
-        })
-        .catch(error => {
-            console.log("Fullscreen unavailable:", error);
-            resizeGame();
-        });
-} else {
-    resizeGame();
-}
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock("landscape")
+                        .catch(error => {
+                            console.log(
+                                "Landscape lock unavailable:",
+                                error
+                            );
+                        });
+                }
+            })
+            .catch(error => {
+                console.log("Fullscreen unavailable:", error);
+                resizeGame();
+            });
+    } else {
+        resizeGame();
+    }
 };
 
 window.continueGame = function () {
@@ -1930,55 +2191,40 @@ window.restartGame = function () {
 };
 
 // =====================================
-// 28. MOBILE CONTROLS
+// 28. TOUCH CONTROLS (CIRCLE PAD + ACTION BUTTONS)
 // =====================================
 
 document.querySelectorAll("[data-move]").forEach(button => {
     const action = button.dataset.move;
+
+    // Stop the long-press menu on phones
+    button.addEventListener("contextmenu", event => {
+        event.preventDefault();
+    });
 
     button.addEventListener("pointerdown", event => {
         event.preventDefault();
 
         if (!gameStarted || gameOver) return;
 
-        if (action === "left") {
-            keys.a = true;
-        }
-
-        if (action === "right") {
-            keys.d = true;
-        }
+        if (action === "left") keys.a = true;
+        if (action === "right") keys.d = true;
 
         if (action === "jump") jump();
         if (action === "shoot") shoot();
-
-        // FIX: HTML uses data-move="hide"
         if (action === "hide") toggleHide();
-
         if (action === "medkit") useMedkit();
         if (action === "reload") reload();
 
-        if (action === "run") {
-            isRunning = true;
-        }
-
-        if (action === "crouch") {
-            isCrouching = true;
-        }
+        if (action === "run") isRunning = true;
+        if (action === "crouch") isCrouching = true;
     });
 
     const stop = () => {
-        if (action === "left") {
-            keys.a = false;
-        }
+        if (action === "left") keys.a = false;
+        if (action === "right") keys.d = false;
 
-        if (action === "right") {
-            keys.d = false;
-        }
-
-        if (action === "run") {
-            isRunning = false;
-        }
+        if (action === "run") isRunning = false;
 
         if (action === "crouch" && !isHidden) {
             isCrouching = false;
@@ -2006,7 +2252,6 @@ function resizeGame() {
     );
 
     // Keep the same vertical world view.
-    // Landscape screens automatically show more horizontal space.
     const viewHeight = 12;
     const aspect = width / height;
 
@@ -2028,20 +2273,15 @@ function resizeGame() {
     renderer.setSize(width, height, false);
 }
 
-// Browser window resize
 window.addEventListener("resize", resizeGame);
 
-// Phone orientation change
 window.addEventListener("orientationchange", () => {
     requestAnimationFrame(() => {
         resizeGame();
-
-        // Resize again after the browser finishes changing layout
         requestAnimationFrame(resizeGame);
     });
 });
 
-// Detect changes in the actual game container
 if ("ResizeObserver" in window) {
     const gameResizeObserver = new ResizeObserver(() => {
         resizeGame();
@@ -2050,7 +2290,6 @@ if ("ResizeObserver" in window) {
     gameResizeObserver.observe(gameContainer);
 }
 
-// Fullscreen changes can also change the game dimensions
 document.addEventListener("fullscreenchange", () => {
     requestAnimationFrame(() => {
         resizeGame();
@@ -2061,8 +2300,14 @@ document.addEventListener("fullscreenchange", () => {
 // 30. GAME LOOP
 // =====================================
 
+let lastFrameTime = performance.now();
+
 function animate() {
     requestAnimationFrame(animate);
+
+    const nowTime = performance.now();
+    const dt = Math.min(100, nowTime - lastFrameTime);
+    lastFrameTime = nowTime;
 
     if (gameStarted && !gameOver) {
         updatePlayer();
@@ -2072,7 +2317,7 @@ function animate() {
         updateCollectibles();
         updateCamera();
 
-        checkMissionProgress();
+        checkMissionProgress(dt);
     }
 
     renderer.render(scene, camera);
@@ -2098,6 +2343,31 @@ if (startGameButton) {
     });
 }
 
+// How To Play (main menu): copy the instructions from the in-game overlay
+const instructionsBody = document.getElementById("instructionsBody");
+const menuInstructions = document.getElementById("menuInstructions");
+
+if (instructionsBody && menuInstructions) {
+    menuInstructions.innerHTML = instructionsBody.innerHTML;
+}
+
+const howToButton = document.getElementById("howToButton");
+const howToBackButton = document.getElementById("howToBackButton");
+
+if (howToButton) {
+    howToButton.addEventListener("click", () => {
+        document.getElementById("mainMenu").hidden = true;
+        document.getElementById("howToScreen").hidden = false;
+    });
+}
+
+if (howToBackButton) {
+    howToBackButton.addEventListener("click", () => {
+        document.getElementById("howToScreen").hidden = true;
+        document.getElementById("mainMenu").hidden = false;
+    });
+}
+
 // Continue button in controls tutorial
 const continueButton = document.getElementById("continueButton");
 
@@ -2107,7 +2377,7 @@ if (continueButton) {
     });
 }
 
-// Restart Game Button
+// Restart Game button (goes straight back into the game)
 const restartButton = document.getElementById("restartButton");
 
 if (restartButton) {
@@ -2117,7 +2387,7 @@ if (restartButton) {
     });
 }
 
-// Quit Game Button
+// Quit Game button
 const quitButton = document.getElementById("quitButton");
 
 if (quitButton) {
@@ -2136,7 +2406,6 @@ if (quitButton) {
         gameStarted = false;
 
         updateHUD();
-        
     });
 }
 
