@@ -373,6 +373,44 @@ const runSpeed = 0.17;
 
 const keys = {};
 
+// SCORE SYSTEM
+const HIGH_SCORE_KEY = "outbreakHighScore";
+let score = 0;
+let highScore = 0;
+
+try {
+    highScore = parseInt(localStorage.getItem(HIGH_SCORE_KEY)) || 0;
+} catch (e) {
+    highScore = 0;
+}
+
+function addScore(points) {
+    score += points;
+    updateHUD();
+}
+
+function finalizeScore() {
+    const isNewRecord = score > highScore;
+
+    if (isNewRecord) {
+        highScore = score;
+
+        try {
+            localStorage.setItem(HIGH_SCORE_KEY, String(highScore));
+        } catch (e) {}
+    }
+
+    document.getElementById("finalScore").textContent = score;
+    document.getElementById("finalHighScore").textContent = highScore;
+    document.getElementById("newRecordText").hidden = !isNewRecord;
+
+    updateHUD();
+}
+
+// WALK ANIMATION
+const SPRITE_FACES_RIGHT = true;  
+let walkTime = 0;
+
 // =====================================
 // 11. STORY, MISSIONS AND PROGRESSION
 // =====================================
@@ -526,6 +564,9 @@ function winGame() {
 
     updateMission("MISSION COMPLETE!");
 
+    addScore(500 + health * 5);   
+    finalizeScore();
+
     const sceneTitle = document.getElementById("scene-title");
     const locationText = document.getElementById("location");
 
@@ -574,12 +615,21 @@ function updateHUD() {
         medkitDisplay.textContent = medkits;
     }
 
+    const scoreDisplay = document.getElementById("score");
+    if (scoreDisplay) scoreDisplay.textContent = score;
+
+    const highScoreDisplay = document.getElementById("highScore");
+    if (highScoreDisplay) highScoreDisplay.textContent = highScore;
+
+    const menuHigh = document.getElementById("menuHighScore");
+    if (menuHigh) menuHigh.textContent = highScore;
+
     const items = document.getElementById("items");
 
     if (items) {
-        items.textContent = isHidden
+            items.textContent = isHidden
             ? "HIDDEN"
-            : "SURVIVING | WEAPON LV. " + weaponLevel;
+            : "WEAPON LV. " + weaponLevel;
     }
 }
 
@@ -661,6 +711,32 @@ function updatePlayer() {
         isGrounded = false;
     }
 
+    // Gumagalaw ba ang player?
+    const isMoving =
+        !isHidden &&
+        (keys.a || keys.d || keys.arrowleft || keys.arrowright);
+
+    // Kapag nakatayo, humarap sa pinakamalapit na zombie
+    if (!isMoving) {
+        let nearest = null;
+        let nearestDist = 12;
+
+        for (const enemy of enemies) {
+            if (!enemy.alive) continue;
+
+            const d = Math.abs(enemy.mesh.position.x - player.position.x);
+
+            if (d < nearestDist) {
+                nearest = enemy;
+                nearestDist = d;
+            }
+        }
+
+        if (nearest) {
+            facing = nearest.mesh.position.x > player.position.x ? 1 : -1;
+        }
+    }
+
     if (playerSprite) {
         const crouchHeight = 1.45;
 
@@ -669,7 +745,20 @@ function updatePlayer() {
                 ? crouchHeight
                 : playerSpriteHeight;
 
-        playerSprite.scale.x = playerSpriteWidth * facing;
+        playerSprite.scale.x =
+            playerSpriteWidth * facing * (SPRITE_FACES_RIGHT ? 1 : -1);
+
+        // Walking bob at sway
+        if (isMoving && isGrounded) {
+            walkTime += isRunning ? 0.4 : 0.28;
+
+            playerSprite.position.y = Math.abs(Math.sin(walkTime)) * 0.12;
+            playerSprite.material.rotation = Math.sin(walkTime) * 0.06;
+        } else {
+            walkTime = 0;
+            playerSprite.position.y = 0;
+            playerSprite.material.rotation = 0;
+        }
     }
 }
 
@@ -1107,17 +1196,22 @@ function updateEnemies() {
         }
 
         // Face player
-        enemy.mesh.rotation.y = distance < 0 ? Math.PI : 0;
+        enemy.mesh.rotation.y = distance < 0 ? -1.2 : 1.2;
+
+        if (enemy.healthBar) {
+            enemy.healthBar.rotation.y = -enemy.mesh.rotation.y;
+        }
+
 
         // Walking animation
-        const walk =
-            Math.sin(now * 0.006 + enemy.walkOffset) * 0.35;
+       const walk =
+            Math.sin(now * 0.006 + enemy.walkOffset) * 0.5;
 
-        enemy.leftLeg.rotation.z = walk;
-        enemy.rightLeg.rotation.z = -walk;
+        enemy.leftLeg.rotation.x = walk;
+        enemy.rightLeg.rotation.x = -walk;
 
-        enemy.leftArm.rotation.z = -walk * 0.8;
-        enemy.rightArm.rotation.z = walk * 0.8;
+        enemy.leftArm.rotation.x = -0.8 - walk * 0.4;
+        enemy.rightArm.rotation.x = -0.8 + walk * 0.4;;
 
         // Head movement
         enemy.head.rotation.z =
@@ -1223,6 +1317,8 @@ function updateBullets() {
                     scene.remove(enemy.mesh);
 
                     defeatedMonsters++;
+
+                    addScore(enemy.type === "mutant" ? 250 : 100);
 
                     showPickupNotice("INFECTED ELIMINATED");
 
@@ -1473,6 +1569,7 @@ function collectItem(item) {
     scene.remove(item.mesh);
 
     if (item.type === "medkit") {
+        addScore(25);
         medkits++;
         collectedMedkits++;
 
@@ -1480,6 +1577,7 @@ function collectItem(item) {
     }
 
     else if (item.type === "ammo") {
+        addScore(25);
         reserveAmmo += 24;
         collectedAmmo++;
 
@@ -1487,6 +1585,7 @@ function collectItem(item) {
     }
 
     else if (item.type === "weapon") {
+        addScore(100);
         collectedWeapon = true;
         weaponLevel = 2;
         bulletDamage = 30;
@@ -1495,6 +1594,7 @@ function collectItem(item) {
     }
 
     else if (item.type === "supply") {
+        addScore(50);
         medkits++;
         reserveAmmo += 12;
 
@@ -1611,6 +1711,7 @@ function endGame() {
     gameStarted = false;
 
     updateMission("MISSION FAILED");
+    finalizeScore();
 
     const storyText = document.getElementById("story-text");
     const locationText = document.getElementById("location");
@@ -1653,6 +1754,8 @@ window.beginGame = function () {
     loadPlayerCharacter();
 
     // Reset player stats
+    score = 0;
+    document.getElementById("newRecordText").hidden = true;
     health = 100;
     ammo = 12;
     reserveAmmo = 48;
@@ -2009,7 +2112,8 @@ const restartButton = document.getElementById("restartButton");
 
 if (restartButton) {
     restartButton.addEventListener("click", () => {
-        window.location.reload();
+        document.getElementById("gameEndScreen").hidden = true;
+        window.beginGame();
     });
 }
 
@@ -2030,6 +2134,9 @@ if (quitButton) {
 
         gameOver = false;
         gameStarted = false;
+
+        updateHUD();
+        
     });
 }
 

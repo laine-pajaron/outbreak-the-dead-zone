@@ -1611,3 +1611,18 @@ button:focus-visible {
         max-height: 26dvh;
     }
 }
+
+.game-end-content .game-end-scores {
+    margin-bottom: 22px;
+}
+
+.game-end-content .game-end-scores p {
+    color: #a9c69c;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+}
+
+.game-end-content #newRecordText {
+    color: #ffd28a;
+}

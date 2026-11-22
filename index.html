@@ -100,6 +100,8 @@
                 <span id="displayUsername"></span>
             </p>
 
+            <p class="welcome-text">HIGH SCORE: <span id="menuHighScore">0</span></p>
+
             <button id="startGameButton">START GAME</button>
 
             <p class="screen-description">
@@ -141,6 +143,16 @@
             <div class="hud-stat">
                 <span>INVENTORY</span>
                 <span id="items">0</span>
+            </div>
+
+            <div class="hud-stat">
+                <span>⭐ SCORE</span>
+                <span id="score">0</span>
+            </div>
+
+            <div class="hud-stat">
+                 <span>🏆 BEST</span>
+                <span id="highScore">0</span>
             </div>
 
         </div>
@@ -222,6 +234,12 @@
         <p id="gameEndMessage">
             You have been overrun by the infected.
         </p>
+
+        <div class="game-end-scores">
+       <p>SCORE: <span id="finalScore">0</span></p>
+       <p>HIGH SCORE: <span id="finalHighScore">0</span></p>
+       <p id="newRecordText" hidden>★ NEW HIGH SCORE! ★</p>
+      </div>
 
         <div class="game-end-buttons">
             <button id="restartButton">RESTART GAME</button>
