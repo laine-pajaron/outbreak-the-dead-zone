@@ -143,6 +143,10 @@ textureLoader.load(
     (texture) => {
         texture.colorSpace = THREE.SRGBColorSpace;
 
+        // I-ulit ang image para hindi mauunat
+        texture.wrapS = THREE.MirroredRepeatWrapping;
+        texture.repeat.set(140 / 32, 1);
+
         const backgroundMaterial = new THREE.MeshBasicMaterial({
             map: texture,
             depthWrite: false,
@@ -163,6 +167,7 @@ textureLoader.load(
 
         console.log("Forest background loaded!");
     },
+
 
     undefined,
 
@@ -207,7 +212,7 @@ for (let x = -10; x < 120; x += 8) {
 const platforms = [];
 
 function addPlatform(x, y, width) {
-    makeBox(55, -5.9, 0, 130, 4, 4, mat.ground);
+    makeBox(x, y, 0, width, 0.45, 2, mat.platform);
 
     platforms.push({
         x: x - width / 2,
